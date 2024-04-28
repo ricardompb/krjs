@@ -22,6 +22,12 @@ const audit = require('../../models/audit')(sequelize, DataTypes)
 document.hasMany(audit)
 audit.belongsTo(document, { foreignKey: 'documentId' })
 
+async function createTables () {
+  await document.sync()
+  await sequence.sync()
+  await audit.sync()
+}
+
 const getCurrentTenant = (ctx) => {
   if (!krapp) return '6a942c55-6573-45ac-bde7-50c0c1c55480'
   return ctx?.tenant || krapp.DEFAULT_TENANT_ID
@@ -47,6 +53,7 @@ const connect = async () => {
   if (!cluster.isMaster) return
   try {
     await sequelize.authenticate()
+    await createTables()
   } catch (e) {
     throw new Error(e)
   }
