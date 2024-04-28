@@ -6,6 +6,10 @@
   "keywords": [],
   "author": "Ricardo Silva Pereira",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ricardompb/krjs.git"
+  },
   "dependencies": {
     "@jest/globals": "^29.5.0",
     "@whiskeysockets/baileys": "^6.6.0",
