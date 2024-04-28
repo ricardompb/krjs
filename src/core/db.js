@@ -52,8 +52,8 @@ const connect = async () => {
   const cluster = require('../core/cluster')
   if (!cluster.isMaster) return
   try {
-    await sequelize.authenticate()
     await createTables()
+    await sequelize.authenticate()
   } catch (e) {
     throw new Error(e)
   }
