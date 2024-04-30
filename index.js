@@ -1,7 +1,6 @@
 const Db = require('./src/core/db')
 const Api = require('./src/core/api')
 const Model = require('./src/core/model')
-const ModelApi  = require('/src/core/apis/model.api')
 const Logger = require('./src/core/logger')
 const Scheduler = require('./src/core/scheduler')
 const SystemError = require('./src/core/SystemError')
@@ -17,7 +16,6 @@ module.exports = {
   Db,
   Api,
   Model,
-  ModelApi,
   Logger,
   Scheduler,
   SystemError,
