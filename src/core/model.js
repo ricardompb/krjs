@@ -330,7 +330,7 @@ const createOrReplaceViewModel = async (modelName, ctx) => {
   SELECT d.id,
          d.type,
          ${fields.join(',')},
-         json_build_object(${data}) as "data",
+         jsonb_build_object(${data}) as "data",
          d."tenantId", 
          d."createdAt", 
          d."updatedAt", 
