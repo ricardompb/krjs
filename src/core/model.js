@@ -183,18 +183,15 @@ const handlerEager = async (current, field, key, val, ctx) => {
     })
   }
 }
-const handlerLazy = async (current, field, key, val, ctx) => {
-  if (field.type instanceof Lazy) {
+const handlerLazy = async (self, current, inst, field, key, val, ctx) => {
+  if (val && field.type instanceof Lazy) {
     const { model, key } = field.type
-    if (val?.length > 0) {
-      for await (const inst of val) {
-        inst.data[key] = current
-        await model.createOrUpdate(inst, ctx)
-      }
-    } else {
-      await model.createOrUpdate(current, ctx)
+    for await (const inst of val) {
+      inst.data[key] = current
+      await model.createOrUpdate(inst, ctx)
     }
   }
+  await self.createOrUpdate(inst, ctx)
 }
 const handlerSchema = async (current, field, key, val, ctx) => {
   if (field.type instanceof Schema && val) {
@@ -247,7 +244,7 @@ const copyData = async (self, current, inst, ctx) => {
       default:
         handlerForeignKey(current, field, key, val)
         await handlerEager(current, field, key, val, ctx)
-        await handlerLazy(current, field, key, val, ctx)
+        await handlerLazy(self, current, inst, field, key, val, ctx)
         await handlerSchema(current, field, key, val, ctx)
     }
   }
