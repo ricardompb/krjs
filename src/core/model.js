@@ -183,7 +183,7 @@ const handlerEager = async (current, field, key, val, ctx) => {
     })
   }
 }
-const handlerLazy = async (self, current, inst, field, key, val, ctx) => {
+const handlerLazy = async (current, field, key, val, ctx) => {
   if (val && field.type instanceof Lazy) {
     const { model, key } = field.type
     for await (const inst of val) {
@@ -191,7 +191,6 @@ const handlerLazy = async (self, current, inst, field, key, val, ctx) => {
       await model.createOrUpdate(inst, ctx)
     }
   }
-  await self.createOrUpdate(inst, ctx)
 }
 const handlerSchema = async (current, field, key, val, ctx) => {
   if (field.type instanceof Schema && val) {
