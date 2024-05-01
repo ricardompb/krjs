@@ -184,8 +184,10 @@ const handlerEager = async (current, field, key, val, ctx) => {
   }
 }
 const handlerLazy = async (current, field, key, val, ctx) => {
-  if (val && field.type instanceof Lazy) {
+  val = val || []
+  if (field.type instanceof Lazy) {
     const { model, key } = field.type
+    current.data[key]?.splice(0)
     for await (const inst of val) {
       inst.data[key] = current
       await model.createOrUpdate(inst, ctx)
