@@ -243,7 +243,7 @@ const copyData = async (self, current, inst, ctx) => {
       default:
         handlerForeignKey(current, field, key, val)
         await handlerEager(current, field, key, val, ctx)
-        await handlerLazy(self, current, inst, field, key, val, ctx)
+        await handlerLazy(current, field, key, val, ctx)
         await handlerSchema(current, field, key, val, ctx)
     }
   }
