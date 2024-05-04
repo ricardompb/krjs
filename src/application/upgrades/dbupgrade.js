@@ -31,19 +31,19 @@ module.exports = {
       id: 'dbb37bd0-3d8a-498a-8239-e801a85785de',
       runningAllTenant: true,
       async execute (ctx) {
-        const commandText = `delete from document where type = 'application/template-text' and "tenantId" = '${ctx.tenant}'`
-        await Model.execute(commandText, ctx)
-        const filename = path.join(cwd(), 'resources', 'reset.handlebars')
-        const content = await fs.readFile(filename, { encoding: null })
-        await TemplateTextModel.create({
-          data: {
-            name: 'Resetar Senha do Usuário',
-            url: '/application/auth/register',
-            content: content.toString(),
-            bootstrap: 'N/A',
-            isSystem: true
-          }
-        }, ctx)
+        // const commandText = `delete from document where type = 'application/template-text' and "tenantId" = '${ctx.tenant}'`
+        // await Model.execute(commandText, ctx)
+        // const filename = path.join(cwd(), 'resources', 'reset.handlebars')
+        // const content = await fs.readFile(filename, { encoding: null })
+        // await TemplateTextModel.create({
+        //   data: {
+        //     name: 'Resetar Senha do Usuário',
+        //     url: '/application/auth/register',
+        //     content: content.toString(),
+        //     bootstrap: 'N/A',
+        //     isSystem: true
+        //   }
+        // }, ctx)
       }
     })
   }
