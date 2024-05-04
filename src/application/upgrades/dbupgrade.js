@@ -33,7 +33,7 @@ module.exports = {
       async execute (ctx) {
         const commandText = `delete from document where type = 'application/template-text' and "tenantId" = '${ctx.tenant}'`
         await Model.execute(commandText, ctx)
-        const filename = path.join(cwd(), 'application', 'resources', 'reset.handlebars')
+        const filename = path.join(cwd(), 'resources', 'reset.handlebars')
         const content = await fs.readFile(filename, { encoding: null })
         await TemplateTextModel.create({
           data: {
