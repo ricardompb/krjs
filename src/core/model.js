@@ -186,6 +186,22 @@ const handlerEager = async (current, field, key, val, ctx) => {
 const handlerLazy = async (current, field, key, val, ctx) => {
   if (val && field.type instanceof Lazy) {
     const { model, key } = field.type
+    const remove = async (ids) => {
+      if (ids.length <= 0) return
+      const commandText = `delete from document where type = '${model.schema.name}' and id in ('${ids.join(`','`)}')`
+      await execute(commandText, ctx)
+    }
+
+    const rows = await model.findAll({ where: { data: { [key]: current.id} } }, ctx)
+    const oldIds = rows.map((row) => row.id)
+    if (val.length === 0 && oldIds.length > 0) {
+      return remove(oldIds)
+    }
+
+    const ids = val.map((val) => val.id)
+    const removeIds = oldIds.filter(id => !ids.includes(id))
+    await remove(removeIds)
+
     for await (const inst of val) {
       inst.data[key] = current
       await model.createOrUpdate(inst, ctx)
