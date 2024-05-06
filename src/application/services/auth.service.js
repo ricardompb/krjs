@@ -26,7 +26,7 @@ const generateToken = (user, expiresIn) => {
 }
 const reset = async (params, ctx) => {
   const { code, password } = params
-  const user = await User.findOne({ where: { data: { code } } }, ctx)
+  const user = await User.findOne({ where: { data: { code: parseInt(code) } } }, ctx)
   if (user.data.password) throw new SystemError('Sua senha já foi definida. utilize o processode esquecer senha para criar uma nova senha.')
   user.data.password = await hash(password)
   delete user.data.code

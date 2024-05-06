@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const crypto = require('node:crypto')
 const hash = async (val) => {
-  return bcrypt.hash(val, process.env.ENVIRONMENT_AUTH_SALT)
+  return bcrypt.hash(val, parseInt(process.env.ENVIRONMENT_AUTH_SALT))
 }
 const compare = async (val, valHash) => {
   return bcrypt.compare(val, valHash)
