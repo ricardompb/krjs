@@ -52,13 +52,11 @@ const reqToFile = async (req) => {
       s3ForcePathStyle: true
     })
 
-    const res = await s3.putObject({
+    await s3.putObject({
       Bucket: process.env.S3_BUCKET,
-      key: req.file.originalname,
-      body: req.file.buffer
+      Key: req.file.originalname,
+      Body: req.file.buffer
     })
-
-    console.log(res)
   }
 
   delete req.file.destination
