@@ -243,34 +243,12 @@ router.use(async (req, res, next) => {
       }
     })
 
-    const s3Storage = multer.memoryStorage({
-      destination: async function (req, file, cb) {
-        const s3 = new S3({
-          endpoint: process.env.S3_ENDPOINT,
-          accessKeyId: process.env.S3_ACCESS_KEY_ID,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-          sslEnabled: false,
-          s3ForcePathStyle: true
-        })
-
-        const originalname = ['krapp', uuid.v1().replace(/-/g, ''), file.originalname]
-        await s3.putObject({
-          Bucket: process.env.S3_BUCKET,
-          key: originalname,
-          body: file.buffer
-        })
-      },
-      filename: function (req, file, cb) {
-        cb(null, file.originalname)
-      }
-    })
-
     const upload = multer({
       limits: {
         fileSize: 10 * 1024 * 1024 // Compliant: 10MB
       },
       storage: process.env.S3_ENABLED === 'true'
-        ? s3Storage
+        ? multer.memoryStorage()
         : storage
     })
 

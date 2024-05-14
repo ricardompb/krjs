@@ -1,12 +1,13 @@
 const fs = require('node:fs/promises')
 const path = require('node:path')
 const axios = require('axios')
+const {S3} = require("aws-sdk");
 
 const filesDir = process.env.ENVIRONMENT_FILES
 
 const mkdir = async (destination, recursive = true) => {
   const dir = path.join(filesDir, destination)
-  await fs.mkdir(dir, { recursive })
+  await fs.mkdir(dir, {recursive})
   return dir
 }
 const writeFile = async (destination, data) => {
@@ -23,7 +24,7 @@ const writeFile = async (destination, data) => {
   return fs.writeFile(path.join(filesDir, destination), dataFormatted)
 }
 const readFiles = async (destination, withFileTypes = true) => {
-  const files = await fs.readdir(path.join(filesDir, destination), { withFileTypes })
+  const files = await fs.readdir(path.join(filesDir, destination), {withFileTypes})
   return withFileTypes ? (files.filter(f => f.isFile()) || []).map(f => f.name) : files
 }
 const moveFile = async (filename, source, target) => {
@@ -32,7 +33,7 @@ const moveFile = async (filename, source, target) => {
   return fs.rename(origin, destination)
 }
 const readFile = async (filename, encoding = null) => {
-  return fs.readFile(path.join(filesDir, filename), { encoding })
+  return fs.readFile(path.join(filesDir, filename), {encoding})
 }
 const reqToFile = async (req) => {
   if (!req.file) return
@@ -41,14 +42,33 @@ const reqToFile = async (req) => {
   if (`${isMultiTenant}` === 'true') {
     destination = path.join('tenant', req.headers.tenant, destination)
   }
+
+  if (process.env.S3_ENABLED === 'true') {
+    const s3 = new S3({
+      endpoint: process.env.S3_ENDPOINT,
+      accessKeyId: process.env.S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+      sslEnabled: false,
+      s3ForcePathStyle: true
+    })
+
+    const res = await s3.putObject({
+      Bucket: process.env.S3_BUCKET,
+      key: req.file.originalname,
+      body: req.file.buffer
+    })
+
+    console.log(res)
+  }
+
   delete req.file.destination
   const File = require('../models/file.model')
-  return File.createOrUpdate({ data: { ...req.file, destination } }, req.ctx)
+  return File.createOrUpdate({data: {...req.file, destination}}, req.ctx)
 }
 const downloadFile = async (url, output, ctx) => {
-  const { data, fileName, contentType, contentLength } = await (async () => {
+  const {data, fileName, contentType, contentLength} = await (async () => {
     if (typeof url === 'string') {
-      const response = await axios.get(url, { responseType: 'stream' })
+      const response = await axios.get(url, {responseType: 'stream'})
       const contentType = response.headers['content-type']
       const [, ext] = contentType.split('/')
       const fileName = `${output}.${ext}`
