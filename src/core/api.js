@@ -247,7 +247,9 @@ router.use(async (req, res, next) => {
       limits: {
         fileSize: 10 * 1024 * 1024 // Compliant: 10MB
       },
-      storage
+      storage: process.env.S3_ENABLED === 'true'
+        ? multer.memoryStorage()
+        : storage
     })
 
     return upload.single('upload')(req, res, err => {

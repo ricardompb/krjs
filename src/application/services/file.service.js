@@ -52,7 +52,7 @@ const reqToFile = async (req) => {
       s3ForcePathStyle: true
     })
 
-    await s3.putObject({
+    return s3.putObject({
       Bucket: process.env.S3_BUCKET,
       Key: req.file.originalname,
       Body: req.file.buffer
