@@ -85,7 +85,6 @@ const apiConfig = {
 const endPoints = {}
 
 const { STATUS_CODE } = require('../core')
-const {S3} = require("aws-sdk");
 
 const STATUS_CODE_BY_METHOD = {
   PUT: STATUS_CODE.Ok,
@@ -247,9 +246,7 @@ router.use(async (req, res, next) => {
       limits: {
         fileSize: 10 * 1024 * 1024 // Compliant: 10MB
       },
-      storage: process.env.S3_ENABLED === 'true'
-        ? multer.memoryStorage()
-        : storage
+      storage
     })
 
     return upload.single('upload')(req, res, err => {
