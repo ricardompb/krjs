@@ -13,12 +13,13 @@ module.exports = new Api.Rest({
         await Object.keys(Model.schema).forEachAsync(async key => {
           const model = Model.schema[key]
           if (model.VALUE) {
-            options[model.name] = options[model.schema.name] || []
+            options[model.name] = options[model.name] || []
             const data = await model.schema.findAll({}, req.ctx)
-            options[model.name].push(...data.map(d => {
+            options[model.name].push(data.map(d => {
               return {
                 ...d.data,
-                value: d
+                value: d,
+                ID: model.schema.schema.ID
               }
             }))
           }

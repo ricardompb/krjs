@@ -1,7 +1,6 @@
 const fs = require('node:fs/promises')
 const path = require('node:path')
 const axios = require('axios')
-const {S3} = require("aws-sdk");
 
 const filesDir = process.env.ENVIRONMENT_FILES
 
@@ -42,23 +41,6 @@ const reqToFile = async (req) => {
   if (`${isMultiTenant}` === 'true') {
     destination = path.join('tenant', req.headers.tenant, destination)
   }
-
-  if (process.env.S3_ENABLED === 'true') {
-    const s3 = new S3({
-      endpoint: process.env.S3_ENDPOINT,
-      accessKeyId: process.env.S3_ACCESS_KEY_ID,
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-      sslEnabled: false,
-      s3ForcePathStyle: true
-    })
-
-    return s3.putObject({
-      Bucket: process.env.S3_BUCKET,
-      Key: req.file.originalname,
-      Body: req.file.buffer
-    })
-  }
-
   delete req.file.destination
   const File = require('../models/file.model')
   return File.createOrUpdate({data: {...req.file, destination}}, req.ctx)
