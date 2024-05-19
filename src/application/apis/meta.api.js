@@ -18,8 +18,7 @@ module.exports = new Api.Rest({
             options[model.name].push(...data.map(d => {
               return {
                 ...d.data,
-                value: d,
-                ID: model.schema.schema.ID
+                value: d
               }
             }))
           }
