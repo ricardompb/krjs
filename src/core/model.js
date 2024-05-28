@@ -581,7 +581,7 @@ const setDefaultFilter = (filters, calcAlias, options) => {
 }
 const setFilterValue = (filters, field, searchVal) => {
   if (typeof field === 'string') {
-    filters.push(`${field}::text ~* '${searchVal}'`)
+    filters.push(`${field}::text ilike '%${searchVal}%'`)
   } else {
     const { name, operator } = field
     const percent = operator === 'ilike' ? '%' : ''
