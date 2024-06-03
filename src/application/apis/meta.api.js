@@ -67,6 +67,25 @@ module.exports = new Api.Rest({
           process: process.filter(hasLabel)
         }
       }
+    },
+    logoUrl: {
+      authenticate: '*',
+      label: 'Obter url do logo',
+      handler: async (req, res) => {
+        const Logo = require('../models/logo.model')
+        const logo = await Logo.findOne({ where: { tenantId: req.ctx.tenant } }, req.ctx)
+        if (!logo) return ''
+        return `${process.env.ENVIRONMENT_WEB_URL}/files/${logo.data.fileId.data.destination}/${logo.data.fileId.data.filename}`
+      }
+    },
+    logo: {
+      label: 'Obter logo',
+      authenticate: '*',
+      handler: async (req, res) => {
+        const Logo = require('../models/logo.model')
+        const logo = await Logo.findOne({ where: { tenantId: req.ctx.tenant } }, req.ctx)
+        return logo || { data: {} }
+      }
     }
   },
   POST: {
@@ -88,6 +107,21 @@ module.exports = new Api.Rest({
         } catch (e) {
           logger.error(e)
         }
+      }
+    },
+    uploadLogo: {
+      authenticate: '*',
+      uploader: true,
+      label: 'Upload da logomarca',
+      transaction: 'Upload da logomarca',
+      handler: async (req, res) => {
+        const Logo = require('../models/logo.model')
+        const { reqToFile } = require('../services/file.service')
+        const file = await reqToFile(req)
+        let logo = await Logo.findOne({ where: { tenantId: req.ctx.tenant } }, req.ctx) || { data: {} }
+        logo.data.fileId = file
+        logo = await Logo.createOrUpdate(logo, req.ctx)
+        return logo.data.fileId
       }
     }
   }

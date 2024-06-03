@@ -46,5 +46,13 @@ module.exports = {
         // }, ctx)
       }
     })
+
+    dbUpgrade.Register({
+      id: '5821768a-21fa-11ef-9262-0242ac120002',
+      runningAllTenant: true,
+      async execute (ctx) {
+        await Model.execute(`update document set type = 'application/logo' where type = 'econet/logo'`, ctx)
+      }
+    })
   }
 }
