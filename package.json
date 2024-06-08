@@ -1,6 +1,6 @@
 {
   "name": "krjs",
-  "version": "3.3.3",
+  "version": "3.3.4",
   "description": "Framework para facilitar construção de API da Kr Tecnologia",
   "main": "index.js",
   "keywords": [],
@@ -21,6 +21,8 @@
     "cpf-cnpj-validator": "^1.0.3",
     "dotenv": "^16.0.3",
     "email-validator": "^2.0.4",
+    "errsole": "^2.8.1",
+    "errsole-sequelize": "^1.4.0",
     "excel4node": "^1.8.2",
     "exceljs": "^4.3.0",
     "express": "^4.18.2",

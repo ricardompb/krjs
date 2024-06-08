@@ -1,6 +1,20 @@
 const { createLogger, format, transports } = require('winston')
 const { combine, timestamp, printf } = format
 const { sendMail } = require('../application/services/mail.service')
+const errsole = require('errsole');
+const ErrsoleSequelize = require('errsole-sequelize');
+
+if (process.env.ENVIRONMENT_LOG_DATABASE_NAME) {
+  errsole.initialize({
+    storage: new ErrsoleSequelize({
+      dialect: process.env.ENVIRONMENT_DATABASE_DIALECT,
+      host: process.env.ENVIRONMENT_DATABASE_HOST,
+      username: process.env.ENVIRONMENT_DATABASE_USERNAME,
+      password: process.env.ENVIRONMENT_DATABASE_PASSWORD,
+      database: process.env.ENVIRONMENT_LOG_DATABASE_NAME
+    })
+  })
+}
 
 let wId
 
