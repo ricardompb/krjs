@@ -1,6 +1,6 @@
 {
   "name": "krjs",
-  "version": "3.4.2",
+  "version": "3.4.3",
   "description": "Framework para facilitar construção de API da Kr Tecnologia",
   "main": "index.js",
   "keywords": [],
@@ -53,7 +53,8 @@
     "uuid": "^9.0.0",
     "venom-bot": "^5.0.21",
     "vm2": "^3.9.19",
-    "winston": "^3.8.2"
+    "winston": "^3.8.2",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.23.2",

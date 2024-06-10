@@ -6,7 +6,6 @@ const errsole = require('errsole');
 const ErrsoleSequelize = require('errsole-sequelize');
 
 const port = parseInt(process.env.ENVIRONMENT_API_PORT)
-
 errsole.initialize({
   port: port * 10,
   storage: new ErrsoleSequelize({
@@ -14,9 +13,6 @@ errsole.initialize({
     storage: '/tmp/krjs/database.sqlite'
   })
 })
-
-const app = express()
-app.use('/logger', errsole.expressProxyMiddleware())
 
 let wId
 
