@@ -8,7 +8,7 @@ const ErrsoleSequelize = require('errsole-sequelize');
 const port = parseInt(process.env.ENVIRONMENT_API_PORT)
 
 errsole.initialize({
-  port: port * 1000,
+  port: port * 10,
   storage: new ErrsoleSequelize({
     dialect: 'sqlite',
     storage: '/tmp/krjs/database.sqlite'
