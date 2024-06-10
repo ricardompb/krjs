@@ -1,15 +1,22 @@
+const express = require('express')
 const { createLogger, format, transports } = require('winston')
 const { combine, timestamp, printf } = format
 const { sendMail } = require('../application/services/mail.service')
 const errsole = require('errsole');
 const ErrsoleSequelize = require('errsole-sequelize');
 
+const port = parseInt(process.env.ENVIRONMENT_API_PORT)
+
 errsole.initialize({
+  port: port * 1000,
   storage: new ErrsoleSequelize({
     dialect: 'sqlite',
-    storage: 'database.sqlite'
+    storage: '/tmp/krjs/database.sqlite'
   })
 })
+
+const app = express()
+app.use('/logger', errsole.expressProxyMiddleware())
 
 let wId
 
@@ -99,6 +106,12 @@ logger.addCluster = (cluster) => {
   } else {
     wId = `${cluster.workerId}.${cluster.worker.process.pid}`
   }
+}
+
+const error = logger.error
+logger.error = e => {
+  errsole.error(e)
+  error(e)
 }
 
 module.exports = logger
