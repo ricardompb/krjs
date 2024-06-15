@@ -824,7 +824,6 @@ function Schema (schema) {
   }
   this.remove = async (id, ctx, options = {}) => {
     const inst = await self.get(id, ctx)
-    const { ignoreConstraint } = options
     const executeDelete = async (internalCtx) => {
       if (schema.beforeDelete) {
         await schema.beforeDelete(self, inst, internalCtx)
@@ -841,12 +840,15 @@ function Schema (schema) {
       await inst[action]({ transaction: internalCtx.transaction })
       registerNotify({ type: schema.name, id: inst.id }, internalCtx)
     }
-    if (ignoreConstraint === true) {
-      return executeDelete(ctx)
-    }
-    if (!inst.deletedAt) {
-      const commandText = `select distinct type from document where data::text ~ '${id}' and "deletedAt" is null and id <> '${id}'`
-      const rows = (await execute(commandText, ctx)).map(row => row.type)
+
+    if (!inst.deletedAt && self.schema.constraints) {
+      const commandText = []
+      for (const constraint of self.schema.constraints()) {
+        const { model, pk } = constraint
+        commandText.push(`select distinct type from document where type = '${model}' and data @> '{"${pk}": "${id}"}' and "deletedAt" is null and id <> '${id}'`)
+      }
+
+      const rows = (await execute(commandText.join('\n union all '), ctx)).map(row => row.type)
       if (rows.length > 0) {
         const msg = []
         rows.forEach(row => msg.push(modelSchema[row].label))
