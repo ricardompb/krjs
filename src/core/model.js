@@ -29,12 +29,7 @@ const modelSchema = {}
 
 const getCommandText = (modelName) => {
   const schema = modelSchema[modelName]
-  if (!schema) {
-    return {
-      name: null,
-      sql: null
-    }
-  }
+  if (!schema) return
   const { name, model } = schema
   if (!name) return
   if (!model) throw new SystemError('Model não implementado.')
@@ -365,9 +360,9 @@ Integer.prototype.convert = (val) => { // nosonar
   return parseInt(val)
 }
 const createOrReplaceViewModel = async (modelName, ctx) => {
-  const { name, sql } = getCommandText(modelName)
-  if (!name) return
-  if (!sql) return
+  const params = getCommandText(modelName)
+  if (!params) return
+  const { name, sql } = params
   const commandText = `
   CREATE OR REPLACE VIEW public."${name}" AS
   ${sql}`
