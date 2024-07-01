@@ -517,7 +517,9 @@ const createQuery = (schema, options, ctx) => {
         })
       },
       commandText: `
-        ${sql}        
+        with doc as (${sql})
+        select * from doc d
+        where 1=1
         --TENANT--
         --FILTER--
         --ORDERBY--`
