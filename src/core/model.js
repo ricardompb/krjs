@@ -28,13 +28,14 @@ const sqlFormatter = require('sql-formatter')
 const modelSchema = {}
 
 const getCommandText = (modelName) => {
-  if (/undefined/gi.test(modelName)) {
+  const schema = modelSchema[modelName]
+  if (!schema) {
     return {
       name: null,
       sql: null
     }
   }
-  const { name, model } = modelSchema[modelName]
+  const { name, model } = schema
   if (!name) return
   if (!model) throw new SystemError('Model não implementado.')
 
