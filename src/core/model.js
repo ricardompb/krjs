@@ -26,6 +26,71 @@ const pdf = require('../core/pdf')
 
 const modelSchema = {}
 
+const getCommandText = (modelName) => {
+  const { name, model } = modelSchema[modelName]
+  if (!name) return
+  if (!model) throw new SystemError('Model não implementado.')
+
+  const keys = Object.keys(model)
+  if (keys.length === 0) return
+
+  const fieldsData = []
+  const fields = []
+
+  const getType = type => {
+    switch (type) {
+      case String:
+        return 'text'
+      case Date:
+        return 'timestamp with time zone'
+      case JSON:
+        return 'jsonb'
+      case Boolean:
+        return 'boolean'
+      case Integer:
+        return 'integer'
+      case Number:
+        return 'double precision'
+      default:
+        if (type instanceof ForeignKey) {
+          return 'uuid'
+        }
+        if (type instanceof Eager || type instanceof Schema || type instanceof Lazy) {
+          return 'jsonb'
+        }
+    }
+  }
+
+  keys.forEach(prop => {
+    const field = model[prop]
+    const type = getType(field.type)
+    fieldsData.push(prop)
+    fields.push(`(d.data->>'${prop}')::${type} AS "${prop}"\n`)
+  })
+
+  const data = fieldsData.map(prop => {
+    const field = model[prop]
+    const type = getType(field.type)
+    return `'${prop}', (d.data->>'${prop}')::${type}`
+  }).join('\n,')
+
+  return {
+    sql: `
+      SELECT d.id,
+          d.type,
+          ${fields.join(',')},
+          jsonb_build_object(${data}) as "data",
+          d."tenantId", 
+          d."createdAt", 
+          d."updatedAt", 
+          d."deletedAt"  
+      FROM document d
+      WHERE d.type::text = '${name}'::text
+    `,
+    name
+  }
+}
+
 const errorNumber = async (value, field, inst, label, ctx, msg) => {
   const val = parseFloat(value || '0')
   let { minValue, maxValue } = field
@@ -292,68 +357,10 @@ Integer.prototype.convert = (val) => { // nosonar
   return parseInt(val)
 }
 const createOrReplaceViewModel = async (modelName, ctx) => {
-  const { name, model } = modelSchema[modelName]
-  if (!name) return
-  if (!model) throw new SystemError('Model não implementado.')
-
-  const keys = Object.keys(model)
-  if (keys.length === 0) return
-
-  await execute(`DROP VIEW IF EXISTS public."${name}"`, ctx)
-
-  const fieldsData = []
-  const fields = []
-
-  const getType = type => {
-    switch (type) {
-      case String:
-        return 'text'
-      case Date:
-        return 'timestamp with time zone'
-      case JSON:
-        return 'jsonb'
-      case Boolean:
-        return 'boolean'
-      case Integer:
-        return 'integer'
-      case Number:
-        return 'double precision'
-      default:
-        if (type instanceof ForeignKey) {
-          return 'uuid'
-        }
-        if (type instanceof Eager || type instanceof Schema || type instanceof Lazy) {
-          return 'jsonb'
-        }
-    }
-  }
-
-  keys.forEach(prop => {
-    const field = model[prop]
-    const type = getType(field.type)
-    fieldsData.push(prop)
-    fields.push(`(d.data->>'${prop}')::${type} AS "${prop}"\n`)
-  })
-
-  const data = fieldsData.map(prop => {
-    const field = model[prop]
-    const type = getType(field.type)
-    return `'${prop}', (d.data->>'${prop}')::${type}`
-  }).join('\n,')
-
+  const { name, sql } = getCommandText(modelName)
   const commandText = `
   CREATE OR REPLACE VIEW public."${name}" AS
-  SELECT d.id,
-         d.type,
-         ${fields.join(',')},
-         jsonb_build_object(${data}) as "data",
-         d."tenantId", 
-         d."createdAt", 
-         d."updatedAt", 
-         d."deletedAt"  
-  FROM document d
-  WHERE d.type::text = '${name}'::text
-  `
+  ${sql}`
   try {
     await execute(commandText, ctx)
   } catch (e) {
@@ -496,6 +503,7 @@ const toOptions = (val, op, key, filters, calcAlias) => {
 }
 const createQuery = (schema, options, ctx) => {
   schema.query = schema.query || function () {
+    const { sql } = getCommandText(schema.name)
     return {
       options: {
         alias: 'd',
@@ -509,16 +517,7 @@ const createQuery = (schema, options, ctx) => {
         })
       },
       commandText: `
-        select 
-            d.id,
-            d.type,
-            d.data::jsonb,
-            d."tenantId",                
-            d."createdAt",  
-            d."updatedAt",  
-            d."deletedAt"
-        from "${schema.name}" d
-        WHERE 1=1
+        ${sql}        
         --TENANT--
         --FILTER--
         --ORDERBY--`
