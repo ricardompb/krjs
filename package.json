@@ -1,6 +1,6 @@
 {
   "name": "krjs",
-  "version": "3.5.4",
+  "version": "3.5.5",
   "description": "Framework para facilitar construção de API da Kr Tecnologia",
   "main": "index.js",
   "keywords": [],
@@ -50,6 +50,7 @@
     "redis": "^4.6.6",
     "sequelize": "^6.31.1",
     "socket.io": "^4.6.1",
+    "sql-formatter": "^15.3.2",
     "sqlite3": "^5.1.7",
     "swagger-ui-express": "^5.0.0",
     "uuid": "^9.0.0",

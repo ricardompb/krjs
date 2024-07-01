@@ -23,6 +23,7 @@ moment.locale('pt-br')
 moment.tz.setDefault('America/Sao_Paulo')
 const { convertToCode } = require('./utils')
 const pdf = require('../core/pdf')
+const sqlFormatter = require('sql-formatter')
 
 const modelSchema = {}
 
@@ -75,10 +76,10 @@ const getCommandText = (modelName) => {
   }).join('\n,')
 
   return {
-    sql: `
+    sql: sqlFormatter.format(`
       SELECT d.id,
           d.type,
-          ${fields.join(',')},
+          ${fields.join('\n,')},
           jsonb_build_object(${data}) as "data",
           d."tenantId", 
           d."createdAt", 
@@ -86,7 +87,7 @@ const getCommandText = (modelName) => {
           d."deletedAt"  
       FROM document d
       WHERE d.type::text = '${name}'::text
-    `,
+    `, { language: 'postgresql' }),
     name
   }
 }
