@@ -517,8 +517,8 @@ const createQuery = (schema, options, ctx) => {
         })
       },
       commandText: `
-        with doc as (${sql})
-        select * from doc d
+        WITH doc AS (${sql})
+        SELECT * FROM doc d
         where 1=1
         --TENANT--
         --FILTER--
