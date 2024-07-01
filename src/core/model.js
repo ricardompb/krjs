@@ -28,6 +28,12 @@ const sqlFormatter = require('sql-formatter')
 const modelSchema = {}
 
 const getCommandText = (modelName) => {
+  if (/undefined/gi.test(modelName)) {
+    return {
+      name: null,
+      sql: null
+    }
+  }
   const { name, model } = modelSchema[modelName]
   if (!name) return
   if (!model) throw new SystemError('Model não implementado.')
@@ -359,6 +365,8 @@ Integer.prototype.convert = (val) => { // nosonar
 }
 const createOrReplaceViewModel = async (modelName, ctx) => {
   const { name, sql } = getCommandText(modelName)
+  if (!name) return
+  if (!sql) return
   const commandText = `
   CREATE OR REPLACE VIEW public."${name}" AS
   ${sql}`
