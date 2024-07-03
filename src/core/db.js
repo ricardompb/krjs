@@ -18,6 +18,7 @@ const sequelize = new Sequelize(process.env.ENVIRONMENT_DATABASE_NAME, process.e
 const document = require('../../models/document')(sequelize, DataTypes)
 const sequence = require('../../models/sequence')(sequelize, DataTypes)
 const audit = require('../../models/audit')(sequelize, DataTypes)
+const search = require('../../models/search')(sequelize, DataTypes)
 
 document.hasMany(audit)
 audit.belongsTo(document, { foreignKey: 'documentId' })
@@ -26,6 +27,23 @@ async function createTables () {
   await document.sync()
   await sequence.sync()
   await audit.sync()
+  await search.sync()
+}
+
+async function createIndex () {
+  // create index document
+  await execute('CREATE INDEX IF NOT EXISTS "document/type" ON document (type)')
+  await execute('CREATE INDEX IF NOT EXISTS "document/tenantId" ON document ("tenantId")')
+  await execute('CREATE INDEX IF NOT EXISTS "document/createdAt" ON document ("createdAt")')
+  await execute('CREATE INDEX IF NOT EXISTS "document/updatedAt" ON document ("updatedAt")')
+  await execute('CREATE INDEX IF NOT EXISTS "document/deletedAt" ON document ("deletedAt")')
+  await execute('CREATE INDEX IF NOT EXISTS "document/data" ON document USING gin (data)')
+
+  // create index search
+  await execute('CREATE INDEX IF NOT EXISTS "search/documentId" ON search ("documentId")')
+  await execute('CREATE INDEX IF NOT EXISTS "search/type" ON search ("type")')
+  await execute('CREATE INDEX IF NOT EXISTS "search/key" ON search ("key")')
+  await execute('CREATE INDEX IF NOT EXISTS "search/value" ON search ("value")')
 }
 
 const getCurrentTenant = (ctx) => {
@@ -53,6 +71,7 @@ const connect = async () => {
   if (!cluster.isMaster) return
   try {
     await createTables()
+    await createIndex()
     await sequelize.authenticate()
   } catch (e) {
     throw new Error(e)
@@ -206,8 +225,37 @@ module.exports = {
       inst.changed('data', true)
       const result = await inst.save({ transaction: ctx.transaction })
 
-      profiler.done({ message: `core/db.createOrUpdate slow id=${inst.id}`, timeout, timeoutError: true })
+      profiler.done({ message: `core/db.document.createOrUpdate slow id=${inst.id}`, timeout, timeoutError: true })
       return result
+    }
+  },
+  search: {
+    async createOrUpdate (type, documentId, key, value, ctx = {}) {
+      const profiler = logger.startTimer()
+      const row = await search.findOne({
+        where: {
+          type,
+          documentId,
+          key
+        }
+      })
+
+      if (!row) {
+        return search.create({
+          id: uuid.v1(),
+          type,
+          documentId,
+          key,
+          value
+        }, {
+          transaction: ctx.transaction
+        })
+      }
+
+      row.value = value
+      await row.save({ transaction: ctx.transaction })
+      profiler.done({ message: `core/db.search.createOrUpdate slow id=${row.id}`, timeout, timeoutError: true })
+      return row
     }
   },
   Op,

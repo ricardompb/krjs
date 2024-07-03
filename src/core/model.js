@@ -7,7 +7,8 @@ const {
   UUID,
   EVENT,
   createAudit,
-  getAudit
+  getAudit,
+  search
 } = require('./db')
 const {
   emailValidator,
@@ -721,6 +722,23 @@ const findAndCount = async (self, options, ctx) => {
     rows
   }
 }
+const buildSearch = async (schema, data, ctx) => {
+  const keys = Object.keys(schema.model)
+  const searchs = []
+  for (const key of keys) {
+    const attr = schema.model[key]
+    if (attr.search === true) {
+      searchs.push({
+        key,
+        value: data[attr.key]
+      })
+    }
+  }
+
+  for await (const s of searchs) {
+    await search.createOrUpdate(schema.type, data.id, s.key, s.value, ctx)
+  }
+}
 const createOrUpdate = async (self, inst, ctx) => {
   const schema = self.schema
   try {
@@ -770,6 +788,8 @@ const createOrUpdate = async (self, inst, ctx) => {
     ctx.trackChange.count = ctx.trackChange.count || 0
     ctx.trackChange.count++
     ctx.trackChange.inst = data
+
+    await buildSearch(schema, data, ctx)
 
     return data
   } catch (e) {
