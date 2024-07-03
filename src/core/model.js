@@ -722,7 +722,7 @@ const findAndCount = async (self, options, ctx) => {
     rows
   }
 }
-const buildSearch = async (schema, data, ctx) => {
+const buildSearch = async (schema, inst, ctx) => {
   const keys = Object.keys(schema.model)
   const searchs = []
   for (const key of keys) {
@@ -730,13 +730,13 @@ const buildSearch = async (schema, data, ctx) => {
     if (attr.search === true) {
       searchs.push({
         key,
-        value: data[attr.key]
+        value: inst.data[key]
       })
     }
   }
 
   for await (const s of searchs) {
-    await search.createOrUpdate(schema.type, data.id, s.key, s.value, ctx)
+    await search.createOrUpdate(schema.name, inst.id, s.key, s.value, ctx)
   }
 }
 const createOrUpdate = async (self, inst, ctx) => {

@@ -231,6 +231,8 @@ module.exports = {
   },
   search: {
     async createOrUpdate (type, documentId, key, value, ctx = {}) {
+      if (!value) return
+
       const profiler = logger.startTimer()
       const row = await search.findOne({
         where: {
