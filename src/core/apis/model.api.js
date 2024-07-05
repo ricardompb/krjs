@@ -11,6 +11,7 @@ const removeQueryAttributes = req => {
   delete req.query.offset
   delete req.query.limit
 }
+
 const prepareOptions = params => {
   if (params.recycling !== undefined) {
     params.options.paranoid = `${params.recycling}` === 'false'
@@ -20,6 +21,59 @@ const prepareOptions = params => {
     params.options.paranoid = `${params.paranoid}` === 'true'
   }
 }
+
+const buildSimpleSearch = async (search, model, options) => {
+  const attrs = Object.entries(model.schema.model).filter(attr => {
+    const [, field] = attr
+    return field.search === true
+  })
+
+  const result = await searchTable.findAll({
+    where: {
+      [Op.or]: attrs.map(attr => {
+        const [key] = attr
+        return {
+          key,
+          value: { [Op.iLike]: `%${searchText(search).replace(/[*|\s+]/g, '%')}%` }
+        }
+      })
+    }
+  })
+
+  options.where.id = ['00000000-0000-0000-0000-000000000000']
+  if (result.length > 0) {
+    const ids = [...new Set(result.map(x => x.documentId))]
+    options.where.id.push(...ids)
+  }
+}
+
+const buildAdvancedSearch = async (advancedSearch, options) => {
+  const values = []
+  for (const filter of advancedSearch) {
+    for (const [column, props] of Object.entries(filter)) {
+      if (!/recycling/.test(column)) {
+        const { value } = props
+        values.push({
+          key: column,
+          value: { [Op.iLike]: `%${searchText(value).replace(/[*|\s+]/g, '%')}%` }
+        })
+      }
+    }
+  }
+
+  const result = await searchTable.findAll({
+    where: {
+      [Op.and]: [...values]
+    }
+  })
+
+  options.where.id = ['00000000-0000-0000-0000-000000000000']
+  if (result.length > 0) {
+    const ids = [...new Set(result.map(x => x.documentId))]
+    options.where.id.push(...ids)
+  }
+}
+
 const prepareWhere = async params => {
   let { options, model, rowId, search, advancedSearch } = params
   options.where = options.where || {}
@@ -29,55 +83,14 @@ const prepareWhere = async params => {
   }
 
   if (search) {
-    const attrs = Object.entries(model.schema.model).filter(attr => {
-      const [, field] = attr
-      return field.search === true
-    })
-
-    const result = await searchTable.findAll({
-      where: {
-        [Op.or]: attrs.map(attr => {
-          const [key] = attr
-          return {
-            key,
-            value: { [Op.iLike]: `%${searchText(search).replace(/[*|\s+]/g, '%')}%` }
-          }
-        })
-      }
-    })
-
-    options.where.id = ['00000000-0000-0000-0000-000000000000']
-    if (result.length > 0) {
-      options.where.id.push(...result.map(x => x.documentId))
-    }
+    return buildSimpleSearch(search, model, options)
   }
 
   if (advancedSearch) {
     advancedSearch = decodeURIComponent(advancedSearch)
     advancedSearch = atob(advancedSearch)
     advancedSearch = JSON.parse(advancedSearch)
-
-    const values = []
-    for (const filter of advancedSearch) {
-      for (const [column, props] of Object.entries(filter)) {
-        const { value } = props
-        values.push({
-          key: column,
-          value: { [Op.iLike]: `%${searchText(value).replace(/[*|\s+]/g, '%')}%` }
-        })
-      }
-    }
-
-    const result = await searchTable.findAll({
-      where: {
-        [Op.and]: [...values]
-      }
-    })
-
-    options.where.id = ['00000000-0000-0000-0000-000000000000']
-    if (result.length > 0) {
-      options.where.id.push(...result.map(x => x.documentId))
-    }
+    return buildAdvancedSearch(advancedSearch, options)
   }
 }
 

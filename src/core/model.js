@@ -536,46 +536,24 @@ const createQuery = (schema, options, ctx) => {
 const setWhere = (builder, options) => {
   const { alias } = builder.options || { alias: 'd' }
   if (options.where.id) {
-    builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE ${alias}.id in ('${options.where.id.join(`','`)}')`)
+    builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE ${alias}.id in ('${options.where.id.join(`','`)}') (1=1)`)
   }
 
-  // const { alias } = builder.options || { alias: 'd' }
-  // const calcAlias = `${alias}.`
-  // if (options.where.id) {
-  //   builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE ${alias}.id = '${options.where.id}'`)
-  //   return
-  // }
-  //
-  // const where = []
-  // options.where.data = options.where.data || {}
-  // options.where[Op.and] = options.where[Op.and] || []
-  //
-  // const recycling = options.where[Op.and].remove(x => /recyclebin/.test(x?.literal?.val), (item) => {
-  //   const [, value] = item.literal.val.split('=')
-  //   return /sim/i.test(value)
-  // })
-  //
-  // options.where[Op.and].forEach(and => {
-  //   if (and.literal) {
-  //     where.push(and.literal.val)
-  //   }
-  // })
-  //
-  // for (const [key, value] of Object.entries(options.where.data)) {
-  //   Object.entries(Op).forEach(item => {
-  //     const [, op] = item
-  //     const val = value[op]
-  //     toOptions(val, op, key, where, calcAlias)
-  //   })
-  // }
-  //
-  // if (!recycling && !options.recycling) {
-  //   where.push(`${calcAlias}"deletedAt" is null`)
-  // }
-  //
-  // if (where.length > 0) {
-  //   builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE 1=1 and (${where.join(' and ')})`)
-  // }
+  const calcAlias = `${alias}.`
+  const where = []
+  options.where[Op.and] = options.where[Op.and] || []
+  const recycling = options.where[Op.and].remove(x => /recyclebin/.test(x?.literal?.val), (item) => {
+    const [, value] = item.literal.val.split('=')
+    return /sim/i.test(value)
+  })
+
+  if (!recycling && !options.recycling) {
+    where.push(`${calcAlias}"deletedAt" is null`)
+  }
+
+  if (where.length > 0) {
+    builder.commandText = builder.commandText.replace(/(1=1)/, `AND (${where.join(' and ')}) (1=1)`)
+  }
 }
 const setTenant = (builder, options) => {
   if (options.multiTenant === false) {
