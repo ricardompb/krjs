@@ -263,12 +263,11 @@ module.exports = {
       return row
     },
     async findAll(options, ctx = {}) {
-      const tenantId = getCurrentTenant(ctx)
+      options.where = options.where || {}
+      options.where.tenantId = getCurrentTenant(ctx)
       return search.findAll({
-        where: {
-          ...options,
-          tenantId
-        }
+        ...options,
+        transaction: ctx.transaction
       })
     }
   },

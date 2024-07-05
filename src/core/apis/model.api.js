@@ -2,6 +2,7 @@ const Api = require('../api')
 const { Op } = require('../model')
 const SystemError = require('../SystemError')
 const { searchText, uuidValidate } = require('../utils')
+const { search: searchTable } = require('../db')
 
 const removeQueryAttributes = req => {
   delete req.query.recycling
@@ -19,7 +20,7 @@ const prepareOptions = params => {
     params.options.paranoid = `${params.paranoid}` === 'true'
   }
 }
-const prepareWhere = params => {
+const prepareWhere = async params => {
   let { options, model, rowId, search, advancedSearch } = params
   options.where = options.where || {}
   options.where.type = model.schema.name
@@ -28,12 +29,24 @@ const prepareWhere = params => {
   }
 
   if (search) {
-    options.where.data = options.where.data || {
-      [Op.or]: Object.keys(model.schema.model).map(key => {
-        return {
-          [key]: { [Op.iLike]: `${searchText(search).replace(/[*|\s+]/g, '%')}%` }
-        }
-      })
+    const attrs = Object.entries(model.schema.model).filter(attr => {
+      const [, field] = attr
+      return field.search === true
+    })
+
+    const result = await searchTable.findAll({
+      where: {
+        [Op.or]: attrs.map(attr => {
+          const [key] = attr
+          return {
+            key,
+            value: `%${searchText(search).replace(/[*|\s+]/g, '%')}%`
+          }
+        })
+      }
+    })
+    if (result.length > 0) {
+      options.where.id = result.map(x => x.documentId)
     }
   }
 
@@ -94,7 +107,7 @@ module.exports = (model) => {
 
             removeQueryAttributes(req)
             prepareOptions({ options, recycling, paranoid })
-            prepareWhere({ model, options, rowId, search, advancedSearch })
+            await prepareWhere({ model, options, rowId, search, advancedSearch })
 
             if (model.schema.beforeApiGet) {
               await model.schema.beforeApiGet(req, options)
