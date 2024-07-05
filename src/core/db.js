@@ -44,6 +44,7 @@ async function createIndex () {
   await execute('CREATE INDEX IF NOT EXISTS "search/type" ON search ("type")')
   await execute('CREATE INDEX IF NOT EXISTS "search/key" ON search ("key")')
   await execute('CREATE INDEX IF NOT EXISTS "search/value" ON search ("value")')
+  await execute('CREATE INDEX IF NOT EXISTS "search/tenantId" ON search ("tenantId")')
 }
 
 const getCurrentTenant = (ctx) => {
@@ -243,12 +244,14 @@ module.exports = {
       })
 
       if (!row) {
+        const tenantId = getCurrentTenant(ctx)
         return search.create({
           id: uuid.v1(),
           type,
           documentId,
           key,
-          value
+          value,
+          tenantId
         }, {
           transaction: ctx.transaction
         })
@@ -258,6 +261,15 @@ module.exports = {
       await row.save({ transaction: ctx.transaction })
       profiler.done({ message: `core/db.search.createOrUpdate slow id=${row.id}`, timeout, timeoutError: true })
       return row
+    },
+    async findAll(options, ctx = {}) {
+      const tenantId = getCurrentTenant(ctx)
+      return search.findAll({
+        where: {
+          ...options,
+          tenantId
+        }
+      })
     }
   },
   Op,

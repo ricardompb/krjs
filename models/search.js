@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     type: { type: DataTypes.STRING, allowNull: false },
     key: { type: DataTypes.STRING, allowNull: false },
     value: { type: DataTypes.STRING, allowNull: false },
+    tenantId: { type: DataTypes.UUID, allowNull: false },
   }, {
     sequelize,
     modelName: 'search',
