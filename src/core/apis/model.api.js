@@ -25,7 +25,7 @@ const prepareWhere = async params => {
   options.where = options.where || {}
   options.where.type = model.schema.name
   if (rowId && uuidValidate(rowId)) {
-    options.where.id = rowId
+    options.where.id = [rowId]
   }
 
   if (search) {
@@ -40,11 +40,12 @@ const prepareWhere = async params => {
           const [key] = attr
           return {
             key,
-            value: `%${searchText(search).replace(/[*|\s+]/g, '%')}%`
+            value: { [Op.iLike]: `%${searchText(search).replace(/[*|\s+]/g, '%')}%` }
           }
         })
       }
     })
+
     if (result.length > 0) {
       options.where.id = result.map(x => x.documentId)
     }
