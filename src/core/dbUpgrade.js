@@ -57,6 +57,24 @@ const createCommand = async (ctx) => {
   await Command.createOrUpdate(command, ctx)
 }
 
+const createCommandReindex = async (ctx) => {
+  let command = await Command.findOne({ where: { data: { name: 'Reindex' } } }, ctx)
+  if (!command) {
+    command = {
+      data: {
+        name: 'Reindex',
+        description: 'Recria todas as pesquisas dos modelos',
+        verb: 'post',
+        url: '/application/meta/reindex',
+        body: JSON.stringify({
+          name: '*'
+        })
+      }
+    }
+    await Command.createOrUpdate(command, ctx)
+  }
+}
+
 module.exports = {
   Register: (upgrade) => {
     upgrades.push(upgrade)
@@ -64,6 +82,7 @@ module.exports = {
   async setup () {
     upgrades.push({ id: '40e38b1d-a3a2-486f-91ef-a702326cb8db', execute: createTenantDefault })
     upgrades.push({ id: 'faddbbc1-551b-4271-a6d0-c51347ecb6c2', execute: createCommand })
+    upgrades.push({ id: 'f1f87251-8291-4580-a505-04247ddb0000', execute: createCommandReindex })
     await upgrades.forEachAsync(async upgrade => {
       await dbTransaction(async (ctx) => {
         await execute(upgrade, ctx)

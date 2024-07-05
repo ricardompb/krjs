@@ -123,6 +123,19 @@ module.exports = new Api.Rest({
         logo = await Logo.createOrUpdate(logo, req.ctx)
         return logo.data.fileId
       }
+    },
+    reindex: {
+      label: 'Reindexar pesquisas do sistema',
+      authenticate: '*',
+      transaction: 'Reindexar pesquisas do sistema',
+      async handler (req) {
+        const { name } = req.body
+        try {
+          return Model.reindex(name, req.ctx, true)
+        } catch (e) {
+          logger.error(e)
+        }
+      }
     }
   }
 })

@@ -536,7 +536,7 @@ const createQuery = (schema, options, ctx) => {
 const setWhere = (builder, options) => {
   const { alias } = builder.options || { alias: 'd' }
   if (options.where.id) {
-    builder.commandText = builder.commandText.replace('--FILTER--', `AND ${alias}.id in ('${options.where.id.join(`','`)}')`)
+    builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE ${alias}.id in ('${options.where.id.join(`','`)}')`)
   }
 
   // const { alias } = builder.options || { alias: 'd' }
@@ -802,6 +802,7 @@ const createOrUpdate = async (self, inst, ctx) => {
     throw e
   }
 }
+const reindex = async (name, ctx, force = false) => {}
 
 function Schema (schema) {
   Object.keys(schema.model).forEach(prop => {
@@ -994,5 +995,6 @@ module.exports = {
   UUID,
   Eager,
   Lazy,
-  ForeignKey
+  ForeignKey,
+  reindex
 }

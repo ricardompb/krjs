@@ -55,21 +55,26 @@ const prepareWhere = async params => {
     advancedSearch = decodeURIComponent(advancedSearch)
     advancedSearch = atob(advancedSearch)
     advancedSearch = JSON.parse(advancedSearch)
-    const Model = require('../model')
-    options.where[Op.and] = options.where[Op.and] || []
+
+    const values = []
     for (const filter of advancedSearch) {
       for (const [column, props] of Object.entries(filter)) {
-        const { value, operator } = props
-        if (column === 'recyclebin') {
-          options.where[Op.and].push({
-            literal: Model.literal(`${column}=${value}`)
-          })
-        } else {
-          options.where[Op.and].push({
-            literal: Model.literal(`${column} ${operator} '${searchText(value)}'`)
-          })
-        }
+        const { value } = props
+        values.push({
+          key: column,
+          value: { [Op.iLike]: `%${searchText(value).replace(/[*|\s+]/g, '%')}%` }
+        })
       }
+    }
+
+    const result = await searchTable.findAll({
+      where: {
+        [Op.or]: [...values]
+      }
+    })
+
+    if (result.length > 0) {
+      options.where.id = result.map(x => x.documentId)
     }
   }
 }
