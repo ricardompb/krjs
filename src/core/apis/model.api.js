@@ -69,7 +69,7 @@ const prepareWhere = async params => {
 
     const result = await searchTable.findAll({
       where: {
-        [Op.or]: [...values]
+        [Op.and]: [...values]
       }
     })
 

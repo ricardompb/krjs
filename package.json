@@ -1,6 +1,6 @@
 {
   "name": "krjs",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "Framework para facilitar construção de API da Kr Tecnologia",
   "main": "index.js",
   "keywords": [],
