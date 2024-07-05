@@ -22,6 +22,14 @@ const prepareOptions = params => {
   }
 }
 
+const setFilterId = (result, options) => {
+  options.where.id = ['00000000-0000-0000-0000-000000000000']
+  if (result.length > 0) {
+    const ids = [...new Set(result.map(x => x.documentId))]
+    options.where.id.push(...ids)
+  }
+}
+
 const buildSimpleSearch = async (search, model, options) => {
   const attrs = Object.entries(model.schema.model).filter(attr => {
     const [, field] = attr
@@ -30,6 +38,7 @@ const buildSimpleSearch = async (search, model, options) => {
 
   const result = await searchTable.findAll({
     where: {
+      type: options.where.type,
       [Op.or]: attrs.map(attr => {
         const [key] = attr
         return {
@@ -40,11 +49,7 @@ const buildSimpleSearch = async (search, model, options) => {
     }
   })
 
-  options.where.id = ['00000000-0000-0000-0000-000000000000']
-  if (result.length > 0) {
-    const ids = [...new Set(result.map(x => x.documentId))]
-    options.where.id.push(...ids)
-  }
+  setFilterId(result, options)
 }
 
 const buildAdvancedSearch = async (advancedSearch, options) => {
@@ -63,15 +68,12 @@ const buildAdvancedSearch = async (advancedSearch, options) => {
 
   const result = await searchTable.findAll({
     where: {
+      type: options.where.type,
       [Op.and]: [...values]
     }
   })
 
-  options.where.id = ['00000000-0000-0000-0000-000000000000']
-  if (result.length > 0) {
-    const ids = [...new Set(result.map(x => x.documentId))]
-    options.where.id.push(...ids)
-  }
+  setFilterId(result, options)
 }
 
 const prepareWhere = async params => {

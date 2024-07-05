@@ -536,24 +536,23 @@ const createQuery = (schema, options, ctx) => {
 const setWhere = (builder, options) => {
   const { alias } = builder.options || { alias: 'd' }
   if (options.where.id) {
-    builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE ${alias}.id in ('${options.where.id.join(`','`)}') AND (1=1)`)
+    builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE ${alias}.id in ('${options.where.id.join(`','`)}')`)
   }
-
-  const calcAlias = `${alias}.`
-  const where = []
-  options.where[Op.and] = options.where[Op.and] || []
-  const recycling = options.where[Op.and].remove(x => /recyclebin/.test(x?.literal?.val), (item) => {
-    const [, value] = item.literal.val.split('=')
-    return /sim/i.test(value)
-  })
-
-  if (!recycling && !options.recycling) {
-    where.push(`${calcAlias}"deletedAt" is null`)
-  }
-
-  if (where.length > 0) {
-    builder.commandText = builder.commandText.replace(/AND (1=1)/, `AND (${where.join(' and ')}) AND (1=1)`)
-  }
+  // const calcAlias = `${alias}.`
+  // const where = []
+  // options.where[Op.and] = options.where[Op.and] || []
+  // const recycling = options.where[Op.and].remove(x => /recyclebin/.test(x?.literal?.val), (item) => {
+  //   const [, value] = item.literal.val.split('=')
+  //   return /sim/i.test(value)
+  // })
+  //
+  // if (!recycling && !options.recycling) {
+  //   where.push(`${calcAlias}"deletedAt" is null`)
+  // }
+  //
+  // if (where.length > 0) {
+  //   builder.commandText = builder.commandText.replace(/AND (1=1)/, `AND (${where.join(' and ')}) AND (1=1)`)
+  // }
 }
 const setTenant = (builder, options) => {
   if (options.multiTenant === false) {
