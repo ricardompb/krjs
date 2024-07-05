@@ -46,8 +46,9 @@ const prepareWhere = async params => {
       }
     })
 
+    options.where.id = ['00000000-0000-0000-0000-000000000000']
     if (result.length > 0) {
-      options.where.id = result.map(x => x.documentId)
+      options.where.id.push(...result.map(x => x.documentId))
     }
   }
 
@@ -73,8 +74,9 @@ const prepareWhere = async params => {
       }
     })
 
+    options.where.id = ['00000000-0000-0000-0000-000000000000']
     if (result.length > 0) {
-      options.where.id = result.map(x => x.documentId)
+      options.where.id.push(...result.map(x => x.documentId))
     }
   }
 }
