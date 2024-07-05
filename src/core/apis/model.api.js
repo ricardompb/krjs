@@ -56,12 +56,14 @@ const buildAdvancedSearch = async (advancedSearch, options) => {
   const values = []
   for (const filter of advancedSearch) {
     for (const [column, props] of Object.entries(filter)) {
+      const { value } = props
       if (!/recycling/.test(column)) {
-        const { value } = props
         values.push({
           key: column,
           value: { [Op.iLike]: `%${searchText(value).replace(/[*|\s+]/g, '%')}%` }
         })
+      } else {
+        options.recycling = value
       }
     }
   }
