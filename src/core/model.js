@@ -536,7 +536,7 @@ const createQuery = (schema, options, ctx) => {
 const setWhere = (builder, options) => {
   const { alias } = builder.options || { alias: 'd' }
   if (options.where.id) {
-    builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE ${alias}.id in ('${options.where.id.join(`','`)}') (1=1)`)
+    builder.commandText = builder.commandText.replace(/WHERE 1=1/, `WHERE ${alias}.id in ('${options.where.id.join(`','`)}') AND (1=1)`)
   }
 
   const calcAlias = `${alias}.`
@@ -552,7 +552,7 @@ const setWhere = (builder, options) => {
   }
 
   if (where.length > 0) {
-    builder.commandText = builder.commandText.replace(/(1=1)/, `AND (${where.join(' and ')}) (1=1)`)
+    builder.commandText = builder.commandText.replace(/AND (1=1)/, `AND (${where.join(' and ')}) AND (1=1)`)
   }
 }
 const setTenant = (builder, options) => {
