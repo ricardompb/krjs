@@ -705,7 +705,7 @@ const findAndCount = async (self, options, ctx) => {
     rows
   }
 }
-const buildSearch = async (name, id, schema, inst, ctx, modelName = '') => {
+const buildSearch = async (name, id, schema, inst, ctx) => {
   const attrs = Object.entries(schema.model).filter(attr => {
     const [, field] = attr
     return field.search === true
@@ -715,7 +715,7 @@ const buildSearch = async (name, id, schema, inst, ctx, modelName = '') => {
   for (const attr of attrs) {
     const [key, field] = attr
     if (field.type instanceof ForeignKey) {
-      await buildSearch(name, id, field.type.model.schema, inst.data[key], ctx, field.type.model.schema.name)
+      await buildSearch(name, id, field.type.model.schema, inst.data[key], ctx)
       continue
     }
 
@@ -724,7 +724,7 @@ const buildSearch = async (name, id, schema, inst, ctx, modelName = '') => {
     }
 
     searchs.push({
-      key: `${modelName || name}`,
+      key: `${schema.name}.${key}`,
       value: inst.data[key]
     })
   }
