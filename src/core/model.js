@@ -705,7 +705,7 @@ const findAndCount = async (self, options, ctx) => {
     rows
   }
 }
-const buildSearch = async (name, schema, inst, ctx) => {
+const buildSearch = async (name, id, schema, inst, ctx) => {
   const attrs = Object.entries(schema.model).filter(attr => {
     const [, field] = attr
     return field.search === true
@@ -715,13 +715,11 @@ const buildSearch = async (name, schema, inst, ctx) => {
   for (const attr of attrs) {
     const [key, field] = attr
     if (field.type instanceof ForeignKey) {
-      await buildSearch(name, field.type.model.schema, inst.data[key], ctx)
+      await buildSearch(name, id, field.type.model.schema, inst.data[key], ctx)
       continue
     }
+
     if (field.type instanceof Eager) {
-      // for (const data of inst.data[key]) {
-      //   return buildSearch(name, schema, data, ctx)
-      // }
       continue
     }
 
@@ -732,7 +730,7 @@ const buildSearch = async (name, schema, inst, ctx) => {
   }
 
   for await (const s of searchs) {
-    await search.createOrUpdate(name, inst.id, s.key, s.value, ctx)
+    await search.createOrUpdate(name, id, s.key, s.value, ctx)
   }
 }
 const createOrUpdate = async (self, inst, ctx) => {
@@ -785,7 +783,7 @@ const createOrUpdate = async (self, inst, ctx) => {
     ctx.trackChange.count++
     ctx.trackChange.inst = data
 
-    await buildSearch(schema.name, schema, data, ctx)
+    await buildSearch(schema.name, data.id, schema, data, ctx)
 
     return data
   } catch (e) {

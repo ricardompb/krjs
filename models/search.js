@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     documentId: { type: DataTypes.UUID, allowNull: false },
     type: { type: DataTypes.STRING, allowNull: false },
     key: { type: DataTypes.STRING, allowNull: false },
-    value: { type: DataTypes.TEXT, allowNull: false },
+    value: { type: DataTypes.TEXT },
     tenantId: { type: DataTypes.UUID, allowNull: false },
   }, {
     sequelize,
