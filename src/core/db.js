@@ -238,7 +238,8 @@ module.exports = {
           type,
           documentId,
           key
-        }
+        },
+        transaction: ctx.transaction
       })
 
       if (!row) {
@@ -248,7 +249,7 @@ module.exports = {
           type,
           documentId,
           key,
-          value,
+          value: value || '',
           tenantId
         }, {
           transaction: ctx.transaction
