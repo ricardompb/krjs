@@ -1,5 +1,5 @@
 const Api = require('../api')
-const { Op } = require('../model')
+const { Op, ForeignKey} = require('../model')
 const SystemError = require('../SystemError')
 const { searchText, uuidValidate } = require('../utils')
 const { search: searchTable } = require('../db')
@@ -36,16 +36,31 @@ const buildSimpleSearch = async (search, model, options) => {
     return field.search === true
   })
 
+  const criterias = []
+  const buildCriterias = (attrs) => {
+    attrs.map(attr => {
+      const [key, field] = attr
+      if (field.type instanceof ForeignKey) {
+        const attrs = Object.entries(field.type.model.schema.model).filter(attr => {
+          const [, field] = attr
+          return field.search === true
+        })
+        buildCriterias(attrs)
+      }
+      criterias.push({
+        key,
+        value: { [Op.iLike]: `%${searchText(search).replace(/[*|\s+]/g, '%')}%` }
+      })
+    })
+  }
+
+
+buildCriterias(attrs)
+
   const result = await searchTable.findAll({
     where: {
       type: options.where.type,
-      [Op.or]: attrs.map(attr => {
-        const [key] = attr
-        return {
-          key,
-          value: { [Op.iLike]: `%${searchText(search).replace(/[*|\s+]/g, '%')}%` }
-        }
-      })
+      [Op.or]: criterias
     }
   })
 
