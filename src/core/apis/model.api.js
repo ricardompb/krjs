@@ -37,7 +37,7 @@ const buildSimpleSearch = async (search, model, options) => {
   })
 
   const criterias = []
-  const buildCriterias = (attrs) => {
+  const buildCriterias = (attrs, name) => {
     attrs.map(attr => {
       const [key, field] = attr
       if (field.type instanceof ForeignKey) {
@@ -45,16 +45,16 @@ const buildSimpleSearch = async (search, model, options) => {
           const [, field] = attr
           return field.search === true
         })
-        buildCriterias(attrs)
+        buildCriterias(attrs, field.type.model.schema.name)
       }
       criterias.push({
-        key,
-        value: { [Op.iLike]: `%${searchText(search).replace(/[*|\s+]/g, '%')}%` }
+        key: `${name}.${key}`,
+        value: { [Op.iLike]: `${searchText(search).replace(/[*|\s+]/g, '%')}%` }
       })
     })
   }
 
-  buildCriterias(attrs)
+  buildCriterias(attrs, model.schema.name)
   const result = await searchTable.findAll({
     where: {
       type: options.where.type,

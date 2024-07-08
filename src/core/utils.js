@@ -183,6 +183,8 @@ const formatCpfCnpj = val => {
     : val.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
 }
 
+const unaccent = val => val?.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+
 module.exports = {
   uuid,
   emailValidator,
@@ -201,5 +203,6 @@ module.exports = {
   convertToBase64,
   formatCep,
   convertToCode,
-  formatCpfCnpj
+  formatCpfCnpj,
+  unaccent
 }

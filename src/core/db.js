@@ -47,6 +47,10 @@ async function createIndex () {
   await execute('CREATE INDEX IF NOT EXISTS "search/tenantId" ON search ("tenantId")')
 }
 
+async function createExtensions () {
+  await execute('CREATE EXTENSION IF NOT EXISTS unaccent;')
+}
+
 const getCurrentTenant = (ctx) => {
   if (!krapp) return '6a942c55-6573-45ac-bde7-50c0c1c55480'
   return ctx?.tenant || krapp.DEFAULT_TENANT_ID
@@ -73,6 +77,7 @@ const connect = async () => {
   try {
     await createTables()
     await createIndex()
+    await createExtensions()
     await sequelize.authenticate()
   } catch (e) {
     throw new Error(e)
