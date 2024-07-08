@@ -131,7 +131,7 @@ module.exports = new Api.Rest({
       async handler (req) {
         const { name } = req.body
         try {
-          return Model.reindex(name, req.ctx, true)
+          return Model.reindex(name, req.ctx)
         } catch (e) {
           logger.error(e)
         }

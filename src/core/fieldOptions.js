@@ -7,12 +7,14 @@ module.exports = {
     label: {
       type: Model.String,
       label: 'Descrição',
-      required: true
+      required: true,
+      search: true
     },
     value: {
       type: Model.Integer,
       label: 'Nome',
-      required: true
+      required: true,
+      search: true
     },
     order: {
       type: Model.Integer,

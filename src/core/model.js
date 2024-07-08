@@ -705,21 +705,34 @@ const findAndCount = async (self, options, ctx) => {
     rows
   }
 }
-const buildSearch = async (schema, inst, ctx) => {
-  const keys = Object.keys(schema.model)
+const buildSearch = async (name, schema, inst, ctx) => {
+  const attrs = Object.entries(schema.model).filter(attr => {
+    const [, field] = attr
+    return field.search === true
+  })
+
   const searchs = []
-  for (const key of keys) {
-    const attr = schema.model[key]
-    if (attr.search === true) {
-      searchs.push({
-        key,
-        value: inst.data[key]
-      })
+  for (const attr of attrs) {
+    const [key, field] = attr
+    if (field.type instanceof ForeignKey) {
+      await buildSearch(name, field.type.model.schema, inst.data[key], ctx)
+      continue
     }
+    if (field.type instanceof Eager) {
+      // for (const data of inst.data[key]) {
+      //   return buildSearch(name, schema, data, ctx)
+      // }
+      continue
+    }
+
+    searchs.push({
+      key,
+      value: inst.data[key]
+    })
   }
 
   for await (const s of searchs) {
-    await search.createOrUpdate(schema.name, inst.id, s.key, s.value, ctx)
+    await search.createOrUpdate(name, inst.id, s.key, s.value, ctx)
   }
 }
 const createOrUpdate = async (self, inst, ctx) => {
@@ -772,7 +785,7 @@ const createOrUpdate = async (self, inst, ctx) => {
     ctx.trackChange.count++
     ctx.trackChange.inst = data
 
-    await buildSearch(schema, data, ctx)
+    await buildSearch(schema.name, schema, data, ctx)
 
     return data
   } catch (e) {
@@ -780,7 +793,16 @@ const createOrUpdate = async (self, inst, ctx) => {
     throw e
   }
 }
-const reindex = async (name, ctx, force = false) => {}
+const reindexModel = async (schema, ctx) => {}
+const reindex = async (name, ctx) => {
+  if (name !== '*') {
+    const schema = modelSchema[name]
+    return reindexModel(schema, ctx)
+  }
+  for await (const schema of Object.keys(modelSchema)) {
+    await reindexModel(schema, ctx)
+  }
+}
 
 function Schema (schema) {
   Object.keys(schema.model).forEach(prop => {
