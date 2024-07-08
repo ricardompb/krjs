@@ -54,9 +54,7 @@ const buildSimpleSearch = async (search, model, options) => {
     })
   }
 
-
-buildCriterias(attrs)
-
+  buildCriterias(attrs)
   const result = await searchTable.findAll({
     where: {
       type: options.where.type,
