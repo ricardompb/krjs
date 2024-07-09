@@ -715,7 +715,13 @@ const buildSearch = async (name, id, schema, inst, ctx) => {
   for (const attr of attrs) {
     const [key, field] = attr
     if (field.type instanceof ForeignKey) {
-      await buildSearch(name, id, field.type.model.schema, inst.data[key], ctx)
+      const data = await (async () => {
+        if (uuidValidate(inst.data[key])) {
+          return field.type.model.get(inst.data[key], ctx)
+        }
+        return inst.data[key]
+      })()
+      await buildSearch(name, id, field.type.model.schema, data, ctx)
       continue
     }
 

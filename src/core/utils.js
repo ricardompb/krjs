@@ -139,6 +139,7 @@ const toExtenso = (val, precision = 2) => {
 }
 const dateTimePattern = /(^\d{2}[./-]\d{2}[./-]\d{4}$)|(^\d{2}[./-]\d{2}[./-]\d{4}[' ]\d{2}:\d{2}:\d{2}$)/ // nosonar
 const searchText = val => {
+  if (!val) return
   return val.match(dateTimePattern)
     ? getFormatDateTime(val)
     : val

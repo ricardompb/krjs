@@ -73,7 +73,7 @@ const buildAdvancedSearch = async (advancedSearch, options) => {
       if (!/recycling/.test(column)) {
         values.push({
           key: column,
-          value: { [Op.iLike]: `%${searchText(value).replace(/[*|\s+]/g, '%')}%` }
+          value: { [Op.iLike]: `${searchText(value).replace(/[*|\s+]/g, '%')}%` }
         })
       } else {
         options.recycling = value
