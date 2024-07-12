@@ -91,7 +91,6 @@ const buildAdvancedSearch = async (advancedSearch, options, ctx) => {
       isOk: false
     }
   })
-  simplify = simplify.groupToObject(item => item.documentId)
 
   for (const filter of advancedSearch) {
     for (const [column, props] of Object.entries(filter)) {
@@ -104,8 +103,13 @@ const buildAdvancedSearch = async (advancedSearch, options, ctx) => {
     }
   }
 
-  if (simplify.every(item => item.isOk)) {
-    result.push(...simplify.map(item => item.id))
+  simplify = simplify.groupToObject(item => item.id)
+  for (const [id, values] of Object.entries(simplify)) {
+    if (values.every(item => item.isOk)) {
+      result.push({
+        documentId: id
+      })
+    }
   }
 
   setFilterId(result, options)
