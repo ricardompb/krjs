@@ -3,6 +3,7 @@ const { Op, ForeignKey} = require('../model')
 const SystemError = require('../SystemError')
 const { searchText, uuidValidate } = require('../utils')
 const { search: searchTable } = require('../db')
+const uuid = require('uuid')
 
 const removeQueryAttributes = req => {
   delete req.query.recycling
@@ -23,7 +24,7 @@ const prepareOptions = params => {
 }
 
 const setFilterId = (result, options) => {
-  options.where.id = ['00000000-0000-0000-0000-000000000000']
+  options.where.id = [uuid.NIL]
   if (result.length > 0) {
     const ids = [...new Set(result.map(x => x.documentId))]
     options.where.id.push(...ids)
@@ -66,27 +67,38 @@ const buildSimpleSearch = async (search, model, options) => {
 }
 
 const buildAdvancedSearch = async (advancedSearch, options) => {
-  const values = []
+  const result = []
+
+  const searchs = await searchTable.findAll({
+    where: {
+      type: options.where.type
+    }
+  })
+
+  const simplify = searchs.map(search => {
+    return {
+      id: search.documentId,
+      column: search.key,
+      value: search.value,
+      isOk: false
+    }
+  })
+
   for (const filter of advancedSearch) {
     for (const [column, props] of Object.entries(filter)) {
-      const { value } = props
-      if (!/recycling/.test(column)) {
-        values.push({
-          key: column,
-          value: { [Op.iLike]: `${searchText(value).replace(/[*|\s+]/g, '%')}%` }
-        })
-      } else {
-        options.recycling = value
+      const item = simplify.find(item => item.column === column)
+      if (item) {
+        const { value } = props
+        item.isOk = `${item.value}`.includes(`${value}`)
       }
     }
   }
 
-  const result = await searchTable.findAll({
-    where: {
-      type: options.where.type,
-      [Op.and]: [...values]
-    }
-  })
+  if (!simplify.every(item => item.isOk)) {
+    result.push(uuid.NIL)
+  } else {
+    result.push(...simplify.map(item => item.id))
+  }
 
   setFilterId(result, options)
 }
