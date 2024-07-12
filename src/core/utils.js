@@ -8,6 +8,15 @@ const { cnpj: isValidCnpj, cpf: isValidCpf } = require('cpf-cnpj-validator')
 momentTimeZone.tz.setDefault('America/Sao_Paulo')
 const { NodeVM } = require('vm2')
 
+Array.prototype.groupToObject = function (keyFn) { // nosonar
+  return this.reduce((acc, val) => {
+    const key = keyFn(val)
+    acc[key] = acc[key] || []
+    acc[key] = acc[key].concat(val)
+    return acc
+  }, {})
+}
+
 Array.prototype.remove = function (fn, condition) {
   const index = this.findIndex(fn)
   if (index > -1) {

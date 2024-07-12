@@ -31,7 +31,7 @@ const setFilterId = (result, options) => {
   }
 }
 
-const buildSimpleSearch = async (search, model, options) => {
+const buildSimpleSearch = async (search, model, options, ctx) => {
   const attrs = Object.entries(model.schema.model).filter(attr => {
     const [, field] = attr
     return field.search === true
@@ -59,23 +59,31 @@ const buildSimpleSearch = async (search, model, options) => {
   const result = await searchTable.findAll({
     where: {
       type: options.where.type,
-      [Op.or]: criterias
+      [Op.or]: criterias,
+      tenantId: ctx.tenant
     }
   })
 
   setFilterId(result, options)
 }
 
-const buildAdvancedSearch = async (advancedSearch, options) => {
+const buildAdvancedSearch = async (advancedSearch, options, ctx) => {
   const result = []
 
   const searchs = await searchTable.findAll({
     where: {
-      type: options.where.type
+      type: options.where.type,
+      key: {
+        [Op.in]: Object.values(advancedSearch).map(search => Object.keys(search)).map(item => {
+          const [column] = item
+          return column
+        })
+      },
+      tenantId: ctx.tenant
     }
   })
 
-  const simplify = searchs.map(search => {
+  let simplify = searchs.map(search => {
     return {
       id: search.documentId,
       column: search.key,
@@ -83,27 +91,27 @@ const buildAdvancedSearch = async (advancedSearch, options) => {
       isOk: false
     }
   })
+  simplify = simplify.groupToObject(item => item.documentId)
 
   for (const filter of advancedSearch) {
     for (const [column, props] of Object.entries(filter)) {
       const item = simplify.find(item => item.column === column)
       if (item) {
         const { value } = props
-        item.isOk = `${item.value}`.includes(`${value}`)
+        const regExp = new RegExp(`${value}`, 'gi')
+        item.isOk = regExp.test(`${item.value}`)
       }
     }
   }
 
-  if (!simplify.every(item => item.isOk)) {
-    result.push(uuid.NIL)
-  } else {
+  if (simplify.every(item => item.isOk)) {
     result.push(...simplify.map(item => item.id))
   }
 
   setFilterId(result, options)
 }
 
-const prepareWhere = async params => {
+const prepareWhere = async (params, ctx) => {
   let { options, model, rowId, search, advancedSearch } = params
   options.where = options.where || {}
   options.where.type = model.schema.name
@@ -112,14 +120,14 @@ const prepareWhere = async params => {
   }
 
   if (search) {
-    return buildSimpleSearch(search, model, options)
+    return buildSimpleSearch(search, model, options, ctx)
   }
 
   if (advancedSearch) {
     advancedSearch = decodeURIComponent(advancedSearch)
     advancedSearch = atob(advancedSearch)
     advancedSearch = JSON.parse(advancedSearch)
-    return buildAdvancedSearch(advancedSearch, options)
+    return buildAdvancedSearch(advancedSearch, options, ctx)
   }
 }
 
@@ -157,7 +165,7 @@ module.exports = (model) => {
 
             removeQueryAttributes(req)
             prepareOptions({ options, recycling, paranoid })
-            await prepareWhere({ model, options, rowId, search, advancedSearch })
+            await prepareWhere({ model, options, rowId, search, advancedSearch }, req.ctx)
 
             if (model.schema.beforeApiGet) {
               await model.schema.beforeApiGet(req, options)
