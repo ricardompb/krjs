@@ -1,6 +1,6 @@
 {
   "name": "krjs",
-  "version": "3.8.4",
+  "version": "3.8.5",
   "description": "Framework para facilitar construção de API da Kr Tecnologia",
   "main": "index.js",
   "keywords": [],
@@ -34,6 +34,7 @@
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
     "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
     "node-firebird": "^1.1.5",
     "node-schedule": "^2.1.1",
     "node-vault": "^0.10.2",

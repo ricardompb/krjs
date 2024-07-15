@@ -1,6 +1,6 @@
 const Logger = require('./logger')
 const Cluster = require('./cluster')
-const Moment = require('moment')
+const cron = require('node-cron')
 const schedulers = []
 
 module.exports = {
@@ -18,11 +18,10 @@ module.exports = {
       const { execute, interval, name, label } = scheduler
       const info = label ? `${label} - ${name}` : name
       Logger.info(`Scheduler: ${info}`)
-      setInterval(() => {
-        execute({
-          runningAt: Moment(new Date())
-        }).catch(e => Logger.error(e))
-      }, interval)
+      cron.schedule(interval, execute, {
+        scheduled: true,
+        timezone: 'America/Sao_Paulo'
+      })
     })
   }
 }
