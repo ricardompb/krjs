@@ -11,7 +11,7 @@ const running = []
 module.exports = {
   name: 'SendMail',
   label: 'Fila de envio de e-mail',
-  interval: 1000,
+  interval: '* * * * *',
   async execute (ctx) {
     const year = new Date().getFullYear()
     const files = [...new Set(await readFiles('mail'))]
