@@ -16,16 +16,19 @@ module.exports = new Model.Schema({
       label: 'E-mail',
       required: true,
       unique: true,
-      isEmail: true
+      isEmail: true,
+      search: true
     },
     nome: {
       type: Model.String,
-      label: 'Nome'
+      label: 'Nome',
+      search: true
     },
     telefone: {
       type: Model.String,
       label: 'Telefone',
-      unmask
+      unmask,
+      search: true
     },
     password: {
       type: Model.String,

@@ -94,11 +94,12 @@ const buildAdvancedSearch = async (advancedSearch, options, ctx) => {
 
   for (const filter of advancedSearch) {
     for (const [column, props] of Object.entries(filter)) {
-      const item = simplify.find(item => item.column === column)
-      if (item) {
-        const { value } = props
-        const regExp = new RegExp(`${value}`, 'gi')
-        item.isOk = regExp.test(`${item.value}`)
+      for (const item of simplify) {
+        if (item.column === column) {
+          const { value } = props
+          const regExp = new RegExp(searchText(`${value}`), 'gi')
+          item.isOk = regExp.test(`${item.value}`)
+        }
       }
     }
   }
