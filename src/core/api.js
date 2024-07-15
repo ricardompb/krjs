@@ -14,9 +14,6 @@ const FileService = require('../application/services/file.service')
 const TriggerModel = require('../application/models/trigger.model')
 const swagger = require('./swagger')
 const Metrics = require('./metrics')
-const errsole = require('errsole');
-
-app.use('/logger', errsole.expressProxyMiddleware())
 
 const origin = process.env.ENVIRONMENT_WEB_CORS
   ? JSON.parse(process.env.ENVIRONMENT_WEB_CORS)
