@@ -225,8 +225,6 @@ router.use(async (req, res, next) => {
   if (uploader === true) {
     const storage = multer.diskStorage({ // nosonar
       destination: async function (req, file, cb) {
-        const originalname = ['krapp', uuid.v1().replace(/-/g, ''), file.originalname]
-        file.originalname = originalname.join('-')
         const [destination, multiTenant] = req.headers.destination.split('?')
         const [, isMultiTenant] = multiTenant.split('=')
         const parts = []
@@ -238,7 +236,8 @@ router.use(async (req, res, next) => {
         cb(null, await FileService.mkdir(parts.join('/')))
       },
       filename: function (req, file, cb) {
-        cb(null, file.originalname)
+        const originalname = ['krapp', uuid.v1().replace(/-/g, ''), file.originalname]
+        cb(null, originalname.join('-'))
       }
     })
 
