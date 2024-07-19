@@ -54,5 +54,22 @@ module.exports = {
         await Model.execute(`update document set type = 'application/logo' where type = 'econet/logo'`, ctx)
       }
     })
+
+    dbUpgrade.Register({
+      id: 'bea62be8-43c8-41b6-9c8d-23cc07aea615',
+      runningAllTenant: true,
+      async execute (ctx) {
+        const data = {
+          name: '/application/auth/register'
+        }
+        const template = await TemplateTextModel.findOne({
+          where: { data }
+        }, ctx) || { data }
+        template.data.content = `Olá, {{nome}}.<br/>
+Bem-Vindo ao <b style="color: blue">{{app}}</b>.<br/><br/>
+Clique <a href="{{url}}">aqui</a> para redefinir sua senha.`
+        await TemplateTextModel.save(template, ctx)
+      }
+    })
   }
 }
