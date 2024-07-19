@@ -8,7 +8,7 @@ const cluster = require('../core/cluster')
 const User = require('../application/models/user.model')
 const jwt = require('jsonwebtoken')
 const { dbTransaction } = require('./transaction')
-const { uuidValidate, uuid, convertToCode } = require('./utils')
+const { uuidValidate, uuid, convertToCode, unmask } = require('./utils')
 const multer = require('multer')
 const FileService = require('../application/services/file.service')
 const TriggerModel = require('../application/models/trigger.model')
@@ -241,9 +241,10 @@ router.use(async (req, res, next) => {
       }
     })
 
+    const fileSize = parseInt(unmask(process.env.ENVIRONMENT_API_LIMIT || 10))
     const upload = multer({
       limits: {
-        fileSize: 50 * 1024 * 1024 // Compliant: 50MB
+        fileSize: fileSize * 1024 * 1024
       },
       storage
     })
