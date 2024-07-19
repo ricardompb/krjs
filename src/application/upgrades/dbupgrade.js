@@ -60,11 +60,12 @@ module.exports = {
       runningAllTenant: true,
       async execute (ctx) {
         const data = {
-          name: '/application/auth/register'
+          url: '/application/auth/register'
         }
         const template = await TemplateTextModel.findOne({
           where: { data }
         }, ctx) || { data }
+        template.data.name = 'Resetar Senha do Usuário'
         template.data.content = `Olá, {{nome}}.<br/>
 Bem-Vindo ao <b style="color: blue">{{app}}</b>.<br/><br/>
 Clique <a href="{{url}}">aqui</a> para redefinir sua senha.`
