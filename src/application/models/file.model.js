@@ -7,31 +7,37 @@ module.exports = new Model.Schema({
     filename: {
       type: Model.String,
       label: 'Nome do Arquivo',
-      required: true
+      required: true,
+      search: true
     },
     originalname: {
       type: Model.String,
       label: 'Nome Original do Arquivo',
-      required: true
+      required: true,
+      search: true
     },
     encoding: {
       type: Model.String,
-      label: 'Encoding'
+      label: 'Encoding',
+      search: true
     },
     mimetype: {
       type: Model.String,
       label: 'Tipo do arquivo',
-      required: true
+      required: true,
+      search: true
     },
     destination: {
       type: Model.String,
       label: 'Destino',
-      required: true
+      required: true,
+      search: true
     },
     size: {
       type: Model.Number,
       label: 'Tamanho',
-      required: true
+      required: true,
+      search: true
     }
   }
 })
