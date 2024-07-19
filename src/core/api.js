@@ -243,7 +243,7 @@ router.use(async (req, res, next) => {
 
     const upload = multer({
       limits: {
-        fileSize: 10 * 1024 * 1024 // Compliant: 10MB
+        fileSize: 50 * 1024 * 1024 // Compliant: 50MB
       },
       storage
     })
