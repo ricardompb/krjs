@@ -68,7 +68,7 @@ module.exports = {
         template.data.content = `Olá, {{nome}}.<br/>
 Bem-Vindo ao <b style="color: blue">{{app}}</b>.<br/><br/>
 Clique <a href="{{url}}">aqui</a> para redefinir sua senha.`
-        await TemplateTextModel.save(template, ctx)
+        await TemplateTextModel.createOrUpdate(template, ctx)
       }
     })
   }
