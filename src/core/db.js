@@ -107,7 +107,7 @@ const getSequence = async (type, ctx, inc = 1) => {
       lock: transaction.LOCK.UPDATE
     })
     if (!seq) {
-      seq = { id: uuid.v1(), type, value: 0, tenantId: ctx.tenant }
+      seq = { type, value: 0, tenantId: ctx.tenant }
     }
     seq.value = parseFloat(seq.value) + inc
     if (seq.save) {

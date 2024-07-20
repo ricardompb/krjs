@@ -241,7 +241,7 @@ router.use(async (req, res, next) => {
       }
     })
 
-    const fileSize = parseInt(unmask(process.env.ENVIRONMENT_API_LIMIT || 10))
+    const fileSize = parseInt(unmask(process.env.ENVIRONMENT_API_LIMIT || '10'))
     const upload = multer({
       limits: {
         fileSize: fileSize * 1024 * 1024
