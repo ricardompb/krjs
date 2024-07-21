@@ -729,13 +729,14 @@ const buildSearch = async (name, id, schema, inst, ctx) => {
       continue
     }
 
+    let value = inst.data[key]
     if (field.type.prototype?.convert) {
-      inst.data[key] = field.type.prototype.convert(inst.data[key])
+      value = field.type.prototype.convert(value)
     }
 
     searchs.push({
       key: `${schema.name}.${key}`,
-      value: inst.data[key]
+      value
     })
   }
 

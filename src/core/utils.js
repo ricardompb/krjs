@@ -99,6 +99,9 @@ const getFormatDateTime = (val) => {
 
 Date.prototype.convert = val => { // nosonar
   if (!val) return
+  if (moment(val).isValid()) {
+    val = moment(val).format()
+  }
   if (/T/i.test(val)) return val
   return getFormatDateTime(val)
 }
