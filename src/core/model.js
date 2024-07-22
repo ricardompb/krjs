@@ -742,11 +742,13 @@ const buildSearch = async (name, id, schema, inst, ctx) => {
 
     searchs.push({
       key: `${schema.name}.${key}`,
-      value
+      value,
+      tenantId: inst.tenantId
     })
   }
 
   for await (const s of searchs) {
+    ctx.tenant = s.tenantId
     await search.createOrUpdate(name, id, s.key, s.value, ctx)
   }
 }

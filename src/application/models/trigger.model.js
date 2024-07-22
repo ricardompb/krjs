@@ -7,17 +7,20 @@ module.exports = new Model.Schema({
     name: {
       type: Model.String,
       label: 'Nome',
-      required: true
+      required: true,
+      search: true
     },
     tipo: {
       type: Model.String,
       label: 'Tipo',
       required: true,
-      default: 'entity'
+      default: 'entity',
+      search: true
     },
     description: {
       type: Model.String,
-      label: 'Descrição'
+      label: 'Descrição',
+      search: true
     },
     beforeExecute: {
       type: Model.String,

@@ -14,11 +14,13 @@ module.exports = new Model.Schema({
       type: Model.String,
       label: 'Nome',
       required: true,
-      unique: true
+      unique: true,
+      search: true
     },
     description: {
       type: Model.String,
-      label: 'Descrição'
+      label: 'Descrição',
+      search: true
     },
     logoId: {
       type: new Model.ForeignKey(File),

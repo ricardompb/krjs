@@ -70,7 +70,8 @@ module.exports = new Model.Schema({
     nome: {
       type: Model.String,
       label: 'Nome',
-      required: true
+      required: true,
+      search: true
     },
     acessos: {
       type: new Model.Eager(Acesso),

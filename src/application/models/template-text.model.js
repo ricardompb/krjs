@@ -9,13 +9,15 @@ module.exports = new Model.Schema({
       type: Model.String,
       label: 'Url',
       unique: true,
-      required: true
+      required: true,
+      search: true
     },
     name: {
       type: Model.String,
       label: 'Nome',
       unique: true,
-      required: true
+      required: true,
+      search: true
     },
     content: {
       type: Model.String,
@@ -29,7 +31,8 @@ module.exports = new Model.Schema({
     isSystem: {
       type: Model.Boolean,
       label: 'Sistema',
-      default: false
+      default: false,
+      search: true
     }
   },
   async beforeDelete (self, inst, ctx) {

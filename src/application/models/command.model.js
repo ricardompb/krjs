@@ -8,22 +8,26 @@ module.exports = new Model.Schema({
     name: {
       type: Model.String,
       label: 'Nome',
-      required: true
+      required: true,
+      search: true
     },
     description: {
       type: Model.String,
       label: 'Descrição',
-      required: true
+      required: true,
+      search: true
     },
     verb: {
       type: Model.String,
       label: 'Verbo',
-      required: true
+      required: true,
+      search: true
     },
     url: {
       type: Model.String,
       label: 'Comando',
-      required: true
+      required: true,
+      search: true
     },
     body: {
       type: Model.String,
