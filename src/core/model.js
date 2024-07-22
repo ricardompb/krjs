@@ -808,11 +808,20 @@ const createOrUpdate = async (self, inst, ctx) => {
     throw e
   }
 }
-const reindexModel = async (schema, ctx) => {}
+const reindexModel = async (schema, ctx) => {
+  ctx.ignoreTenant = true
+  if (/undefined/.test(schema)) return
+  const model = modelSchema[schema]
+  if (model && model.schema.schema.buildSearch !== false) {
+    const rows = await model.schema.findAll({}, ctx)
+    for await (const row of rows) {
+      await buildSearch(schema, row.id, model.schema.schema, row, ctx)
+    }
+  }
+}
 const reindex = async (name, ctx) => {
   if (name !== '*') {
-    const schema = modelSchema[name]
-    return reindexModel(schema, ctx)
+    return reindexModel(name, ctx)
   }
   for await (const schema of Object.keys(modelSchema)) {
     await reindexModel(schema, ctx)

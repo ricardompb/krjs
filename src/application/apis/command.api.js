@@ -7,6 +7,7 @@ module.exports = new Api.Rest({
   POST: {
     execCommand: {
       label: 'Comando',
+      transaction: 'Execute Command',
       async handler (req) {
         return execute(req.body, req.ctx)
       }

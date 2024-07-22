@@ -4,6 +4,7 @@ const User = require('../../application/models/user.model')
 module.exports = new Model.Schema({
   name: 'application/transaction',
   label: 'Transação',
+  buildSearch: false,
   model: {
     description: {
       type: Model.String,
