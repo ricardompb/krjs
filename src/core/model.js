@@ -706,12 +706,18 @@ const findAndCount = async (self, options, ctx) => {
   }
 }
 const buildSearch = async (name, id, schema, inst, ctx) => {
+  if (!inst) return
+
   const attrs = Object.entries(schema.model).filter(attr => {
     const [, field] = attr
     return field.search === true
   })
 
-  const searchs = []
+  const searchs = [{
+    key: `${schema.name}.id`,
+    value: inst.id
+  }]
+
   for (const attr of attrs) {
     const [key, field] = attr
     if (field.type instanceof ForeignKey) {
@@ -726,13 +732,13 @@ const buildSearch = async (name, id, schema, inst, ctx) => {
     }
 
     if (field.type instanceof Eager) {
+      // TODO: navegar em todos os registros do eager para gravar o search, isso será feito em versões futuras...
       continue
     }
 
-    let value = inst.data[key]
-    if (field.type.prototype?.convert) {
-      value = field.type.prototype.convert(value)
-    }
+    const value = field.type.prototype?.convert
+      ? field.type.prototype?.convert(inst.data[key])
+      : inst.data[key]
 
     searchs.push({
       key: `${schema.name}.${key}`,
