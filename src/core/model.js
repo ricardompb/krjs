@@ -715,7 +715,8 @@ const buildSearch = async (name, id, schema, inst, ctx) => {
 
   const searchs = [{
     key: `${schema.name}.id`,
-    value: inst.id
+    value: inst.id,
+    tenantId: inst.tenantId
   }]
 
   for (const attr of attrs) {
