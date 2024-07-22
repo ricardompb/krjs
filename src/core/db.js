@@ -237,18 +237,20 @@ module.exports = {
   },
   search: {
     async createOrUpdate (type, documentId, key, value, ctx = {}) {
+      const tenantId = getCurrentTenant(ctx)
+
       const profiler = logger.startTimer()
       const row = await search.findOne({
         where: {
           type,
           documentId,
-          key
+          key,
+          tenantId
         },
         transaction: ctx.transaction
       })
 
       if (!row) {
-        const tenantId = getCurrentTenant(ctx)
         return search.create({
           id: uuid.v1(),
           type,
