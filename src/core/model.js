@@ -705,7 +705,7 @@ const findAndCount = async (self, options, ctx) => {
     rows
   }
 }
-const buildSearch = async (name, id, schema, inst, ctx) => {
+const buildSearch = async (name, id, schema, inst, ctx, prefix = '') => {
   if (!inst) return
 
   const attrs = Object.entries(schema.model).filter(attr => {
@@ -714,7 +714,7 @@ const buildSearch = async (name, id, schema, inst, ctx) => {
   })
 
   const searchs = [{
-    key: `${schema.name}.id`,
+    key: `${schema.name}${prefix}.id`,
     value: inst.id,
     tenantId: inst.tenantId
   }]
@@ -728,7 +728,7 @@ const buildSearch = async (name, id, schema, inst, ctx) => {
         }
         return inst.data[key]
       })()
-      await buildSearch(name, id, field.type.model.schema, data, ctx)
+      await buildSearch(name, id, field.type.model.schema, data, ctx, `/${key}`)
       continue
     }
 
@@ -742,7 +742,7 @@ const buildSearch = async (name, id, schema, inst, ctx) => {
       : inst.data[key]
 
     searchs.push({
-      key: `${schema.name}.${key}`,
+      key: `${schema.name}${prefix}.${key}`,
       value,
       tenantId: inst.tenantId
     })

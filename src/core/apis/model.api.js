@@ -38,7 +38,7 @@ const buildSimpleSearch = async (search, model, options, ctx) => {
   })
 
   const criterias = []
-  const buildCriterias = (attrs, name) => {
+  const buildCriterias = (attrs, name, prefix = '') => {
     attrs.map(attr => {
       const [key, field] = attr
       if (field.type instanceof ForeignKey) {
@@ -46,11 +46,12 @@ const buildSimpleSearch = async (search, model, options, ctx) => {
           const [, field] = attr
           return field.search === true
         })
-        buildCriterias(attrs, field.type.model.schema.name)
+        buildCriterias(attrs, field.type.model.schema.name, `/${key}`)
       }
+
       criterias.push({
-        key: `${name}.${key}`,
-        value: { [Op.iLike]: `${searchText(search).replace(/[*|\s+]/g, '%')}%` }
+        key: `${name}${prefix}.${key}`,
+        value: { [Op.iLike]: `${searchText(search.trim()).replace(/[*|\s+]/g, '%')}%` }
       })
     })
   }
@@ -97,7 +98,7 @@ const buildAdvancedSearch = async (advancedSearch, options, ctx) => {
       for (const item of simplify) {
         if (item.column === column) {
           const { value } = props
-          const regExp = new RegExp(searchText(`${value}`), 'gi')
+          const regExp = new RegExp(searchText(`${value}`.trim()), 'gi')
           item.isOk = regExp.test(`${item.value}`)
         }
       }

@@ -149,10 +149,11 @@ const toExtenso = (val, precision = 2) => {
   val = val || 0
   return extenso(`${(val).toFixed(precision)}`.replace(/[.]/g, ','), { mode: 'currency' })
 }
+const datePattern = /(^\d{2}[./-]\d{2}[./-]\d{4}$)/
 const dateTimePattern = /(^\d{2}[./-]\d{2}[./-]\d{4}$)|(^\d{2}[./-]\d{2}[./-]\d{4}[' ]\d{2}:\d{2}:\d{2}$)/ // nosonar
 const searchText = val => {
   if (!val) return
-  return val.match(dateTimePattern)
+  return val.match(datePattern) || val.match(dateTimePattern)
     ? getFormatDateTime(val)
     : val
 }
