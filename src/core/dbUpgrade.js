@@ -80,7 +80,9 @@ module.exports = {
     upgrades.push(upgrade)
   },
   async setup () {
-    upgrades.push({ id: '40e38b1d-a3a2-486f-91ef-a702326cb8db', execute: createTenantDefault })
+    // sempre deve ser o primeiro conversor a rodar o conversor de criar o tenant default
+    upgrades.unshift({ id: '40e38b1d-a3a2-486f-91ef-a702326cb8db', execute: createTenantDefault })
+
     upgrades.push({ id: 'faddbbc1-551b-4271-a6d0-c51347ecb6c2', execute: createCommand })
     upgrades.push({ id: 'f1f87251-8291-4580-a505-04247ddb0000', execute: createCommandReindex })
     await upgrades.forEachAsync(async upgrade => {

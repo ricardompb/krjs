@@ -79,7 +79,7 @@ const login = async (params, ctx) => {
   return doLogin(user, ctx)
 }
 const register = async (params, ctx, sendInvite = true) => {
-  const res = await User.findAndCount({
+  const res = await User.findAll({
     where: {
       data: {
         isSystem: { [Op.not]: true }
@@ -89,7 +89,7 @@ const register = async (params, ctx, sendInvite = true) => {
   const inst = {
     data: {
       ...params.data,
-      isAdmin: res.count === 0,
+      isAdmin: res.length === 0,
       code: getCode()
     }
   }
