@@ -117,10 +117,10 @@ const unmask = (val) => {
 const currentDateTime = () => {
   const now = new Date()
   if (process.env.ENVIRONMENT_DATETIME_DST) {
-    if (process.env.ENVIRONMENT_DATETIME_DST) {
+    if (process.env.ENVIRONMENT_DATETIME_DST === 'true') {
       now.setHours(now.getHours() + 1)
     }
-    if (process.env.ENVIRONMENT_DATETIME_HOUR !== undefined) {
+    if (process.env.ENVIRONMENT_DATETIME_HOUR !== '0') {
       now.setHours(now.getHours() + process.env.ENVIRONMENT_DATETIME_HOUR)
     }
   }

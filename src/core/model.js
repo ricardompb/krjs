@@ -542,6 +542,11 @@ const setWhere = (builder, options) => {
   const calcAlias = `${alias}.`
   const where = []
   options.where[Op.and] = options.where[Op.and] || []
+  for (const item of options.where[Op.and]) {
+    if (item?.literal?.val) {
+      where.push(item.literal.val)
+    }
+  }
   const recycling = options.where[Op.and].remove(x => /recyclebin/.test(x?.literal?.val), (item) => {
     const [, value] = item.literal.val.split('=')
     return /sim/i.test(value)
