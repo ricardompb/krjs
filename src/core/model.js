@@ -824,10 +824,7 @@ const reindexModel = async (schema, ctx) => {
   if (model && model.schema.schema.buildSearch !== false) {
     const rows = await model.schema.findAll({}, ctx)
     for await (const row of rows) {
-      await row.save({
-        transaction: ctx.transaction,
-        silent: true
-      })
+      await buildSearch(schema, row.id, model.schema.schema, row, ctx)
     }
   }
 }
