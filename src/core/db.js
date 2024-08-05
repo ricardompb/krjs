@@ -265,8 +265,7 @@ module.exports = {
 
       row.value = value
       await row.save({
-        transaction: ctx.transaction,
-        silent: true
+        transaction: ctx.transaction
       })
       profiler.done({ message: `core/db.search.createOrUpdate slow id=${row.id}`, timeout, timeoutError: true })
       return row

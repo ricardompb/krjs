@@ -81,13 +81,13 @@ const getCommandText = (modelName) => {
   return {
     sql: sqlFormatter.format(`
       SELECT d.id,
-          d.type,
-          ${fields.join('\n,')},
-          jsonb_build_object(${data}) as "data",
-          d."tenantId", 
-          d."createdAt", 
-          d."updatedAt", 
-          d."deletedAt"  
+        d.type,
+        ${fields.join('\n,')},
+        jsonb_build_object(${data}) as "data",
+        d."tenantId", 
+        d."createdAt", 
+        d."updatedAt", 
+        d."deletedAt"  
       FROM document d
       WHERE d.type::text = '${name}'::text
     `, { language: 'postgresql' }),
@@ -523,8 +523,8 @@ const createQuery = (schema, options, ctx) => {
         })
       },
       commandText: `
-        WITH doc AS (${sql})
-        SELECT * FROM doc d
+        WITH document AS (${sql})
+        SELECT * FROM document d
         WHERE 1=1
         --TENANT--
         --FILTER--
@@ -542,15 +542,16 @@ const setWhere = (builder, options) => {
   const calcAlias = `${alias}.`
   const where = []
   options.where[Op.and] = options.where[Op.and] || []
+  const recycling = options.where[Op.and].remove(x => /recyclebin/.test(x?.literal?.val), (item) => {
+    const [, value] = item.literal.val.split('=')
+    return /sim/i.test(value)
+  })
+
   for (const item of options.where[Op.and]) {
     if (item?.literal?.val) {
       where.push(item.literal.val)
     }
   }
-  const recycling = options.where[Op.and].remove(x => /recyclebin/.test(x?.literal?.val), (item) => {
-    const [, value] = item.literal.val.split('=')
-    return /sim/i.test(value)
-  })
 
   if (!recycling && !options.recycling) {
     where.push(`${calcAlias}"deletedAt" is null`)
@@ -823,7 +824,10 @@ const reindexModel = async (schema, ctx) => {
   if (model && model.schema.schema.buildSearch !== false) {
     const rows = await model.schema.findAll({}, ctx)
     for await (const row of rows) {
-      await buildSearch(schema, row.id, model.schema.schema, row, ctx)
+      await row.save({
+        transaction: ctx.transaction,
+        silent: true
+      })
     }
   }
 }
