@@ -4,9 +4,10 @@ module.exports = (sequelize, DataTypes) => {
   class sequence extends Model {}
 
   sequence.init({
-    type: DataTypes.STRING,
-    value: DataTypes.BIGINT,
-    tenantId: DataTypes.UUID
+    id: { type: DataTypes.tenantId, primaryKey: true, allowNull: false },
+    type: { type: DataTypes.STRING, allowNull: false },
+    value: { type: DataTypes.BIGINT, allowNull: false, defaultValue: 0 },
+    tenantId: { type: DataTypes.UUID, allowNull: false },
   }, {
     sequelize,
     modelName: 'sequence',
