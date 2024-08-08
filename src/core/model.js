@@ -368,6 +368,7 @@ const createOrReplaceViewModel = async (modelName, ctx) => {
   CREATE OR REPLACE VIEW public."${name}" AS
   ${sql}`
   try {
+    await execute(`DROP VIEW public."${name}"`)
     await execute(commandText, ctx)
   } catch (e) {
     logger.error(e)

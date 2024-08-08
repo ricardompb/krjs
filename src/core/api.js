@@ -15,11 +15,6 @@ const TriggerModel = require('../application/models/trigger.model')
 const swagger = require('./swagger')
 const Metrics = require('./metrics')
 
-server.on('error', (error) => {
-  logger.error(error)
-  process.exit(1)
-})
-
 const origin = process.env.ENVIRONMENT_WEB_CORS
   ? JSON.parse(process.env.ENVIRONMENT_WEB_CORS)
   : process.env.ENVIRONMENT_WEB_URL
