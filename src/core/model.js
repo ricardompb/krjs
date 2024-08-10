@@ -368,7 +368,7 @@ const createOrReplaceViewModel = async (modelName, ctx) => {
   CREATE OR REPLACE VIEW public."${name}" AS
   ${sql}`
   try {
-    await execute(`DROP VIEW public."${name}"`)
+    await execute(`DROP VIEW IF EXISTS public."${name}"`)
     await execute(commandText, ctx)
   } catch (e) {
     logger.error(e)
@@ -692,23 +692,31 @@ const findAll = async (self, options, ctx) => {
   return document.findAll(options, ctx)
 }
 const findAndCount = async (self, options, ctx) => {
-  const { defaultSort } = self.schema
-  ctx.multiTenant = self.schema.multiTenant
-  options.multiTenant = self.schema.multiTenant
-  options.where = options.where || {}
-  options.defaultSort = defaultSort
-  const query = createQuery(self.schema, options, ctx)
-  setWhere(query, options)
-  setTenant(query, options)
-  setFilter(query, options)
-  setOrderBy(query, options)
-  const [page, rows] = await Promise.all([
-    execute(`select count(*) from (${query.commandText}\n) as x`, ctx),
-    execute(setPagination(query, options).commandText, ctx)
-  ])
-  const [sql] = page
+  if (self.schema.query) {
+    const { defaultSort } = self.schema
+    ctx.multiTenant = self.schema.multiTenant
+    options.multiTenant = self.schema.multiTenant
+    options.where = options.where || {}
+    options.defaultSort = defaultSort
+    const query = self.schema.query(options, ctx)  //createQuery(self.schema, options, ctx)
+    setWhere(query, options)
+    setTenant(query, options)
+    setFilter(query, options)
+    setOrderBy(query, options)
+    const [page, rows] = await Promise.all([
+      execute(`select count(*) from (${query.commandText}\n) as x`, ctx),
+      execute(setPagination(query, options).commandText, ctx)
+    ])
+    const [sql] = page
+    return {
+      count: parseInt(sql.count),
+      rows
+    }
+  }
+
+  const [count, rows] = await document.findAndCount(options, ctx)
   return {
-    count: parseInt(sql.count),
+    count,
     rows
   }
 }

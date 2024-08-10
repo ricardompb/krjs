@@ -196,11 +196,10 @@ module.exports = {
       return document.count(options)
     },
     async findAndCount (options, ctx = {}) {
-      const [rows, count] = await Promise.all([
-        this.findAll(options, ctx),
-        this.count(options, ctx)
-      ])
-      return { count, rows }
+      setFilterTenant(options, ctx)
+      return document.findAndCountAll({
+        transaction: ctx.transaction
+      })
     },
     async createOrUpdate (type, inst, ctx = {}) {
       if (!ctx.transaction) {
