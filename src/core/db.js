@@ -198,6 +198,7 @@ module.exports = {
     async findAndCount (options, ctx = {}) {
       setFilterTenant(options, ctx)
       return document.findAndCountAll({
+        ...options,
         transaction: ctx.transaction
       })
     },

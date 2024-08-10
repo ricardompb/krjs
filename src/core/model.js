@@ -713,12 +713,7 @@ const findAndCount = async (self, options, ctx) => {
       rows
     }
   }
-
-  const [count, rows] = await document.findAndCount(options, ctx)
-  return {
-    count,
-    rows
-  }
+  return document.findAndCount(options, ctx)
 }
 const buildSearch = async (name, id, schema, inst, ctx, prefix = '') => {
   if (!inst) return
