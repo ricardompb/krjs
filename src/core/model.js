@@ -202,6 +202,9 @@ const validations = {
         msg.push(`O tamanho do campo ${field.label} está maior que o máximo permitido.`)
       }
     }
+  },
+  'max-length': (self, value, field, inst, ctx, msg) => {
+    return this.maxLength(self, value, field, inst, ctx, msg)
   }
 }
 const pre = async (self, inst, ctx, msg) => {
@@ -508,32 +511,6 @@ const toOptions = (val, op, key, filters, calcAlias) => {
     filters.push(`${calcAlias}data->>'${key}' ${filtered}`)
   }
 }
-const createQuery = (schema, options, ctx) => {
-  schema.query = schema.query || function () {
-    const { sql } = getCommandText(schema.name)
-    return {
-      options: {
-        alias: 'd',
-        searchFields: Object.keys(schema.model).map(field => {
-          const prop = schema.model[field]
-          return {
-            name: `"${field}"`,
-            type: prop.type,
-            operator: prop.type === Date ? '>=' : 'ilike'
-          }
-        })
-      },
-      commandText: `
-        WITH document AS (${sql})
-        SELECT * FROM document d
-        WHERE 1=1
-        --TENANT--
-        --FILTER--
-        --ORDERBY--`
-    }
-  }
-  return schema.query(options, ctx)
-}
 const setWhere = (builder, options) => {
   const { alias } = builder.options || { alias: 'd' }
   if (options.where.id) {
@@ -698,7 +675,7 @@ const findAndCount = async (self, options, ctx) => {
     options.multiTenant = self.schema.multiTenant
     options.where = options.where || {}
     options.defaultSort = defaultSort
-    const query = self.schema.query(options, ctx)  //createQuery(self.schema, options, ctx)
+    const query = self.schema.query(options, ctx)
     setWhere(query, options)
     setTenant(query, options)
     setFilter(query, options)
@@ -713,6 +690,12 @@ const findAndCount = async (self, options, ctx) => {
       rows
     }
   }
+  if (options.limit === '-1') {
+    delete options.limit
+  }
+
+  options.where = options.where || {}
+  options.where.type = self.schema.name
   return document.findAndCount(options, ctx)
 }
 const buildSearch = async (name, id, schema, inst, ctx, prefix = '') => {

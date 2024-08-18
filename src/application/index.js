@@ -54,6 +54,7 @@ module.exports = {
     Api.Register('/application/apis/command.api')
     Api.Register('/application/apis/notification.api')
     Api.Register('/application/apis/template-text.api')
+    Api.Register('/application/apis/search.api')
     Api.Register('/application/models/logo.model')
 
     require('./upgrades/dbupgrade').setup()
