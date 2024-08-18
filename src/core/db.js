@@ -286,5 +286,6 @@ module.exports = {
   UUID: DataTypes.UUID,
   createAudit,
   EVENT,
-  getAudit
+  getAudit,
+  Search: search
 }
