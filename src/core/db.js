@@ -132,8 +132,8 @@ const EVENT = {
 }
 
 const createAudit = async (inst, event, ctx) => {
-  const { canCreateAudit, user } = ctx
-  if (!user || !canCreateAudit) return
+  if (ctx.audit !== 'create') return
+  const { user } = ctx
   return audit.create({
     id: uuid.v1(),
     documentId: inst.id,
@@ -146,8 +146,7 @@ const createAudit = async (inst, event, ctx) => {
 }
 
 const getAudit = async (inst, ctx) => {
-  const { canCreateAudit, user } = ctx
-  if (!user || !canCreateAudit) return
+  if (ctx.audit !== 'load') return
   const audits = await inst.getAudits()
   const ids = audits.map(audit => audit.userId)
   const users = await document.findAll({ where: { id: ids } })

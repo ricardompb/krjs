@@ -138,12 +138,7 @@ router.use(async (req, res, next) => {
     return res.status(STATUS_CODE.Not_Found).send()
   }
 
-  req.ctx = {
-    api,
-    ...req.query,
-    canCreateAudit: true
-  }
-
+  req.ctx = { api, ...req.query }
   return next()
 })
 
