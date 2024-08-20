@@ -140,8 +140,7 @@ router.use(async (req, res, next) => {
 
   req.ctx = {
     api,
-    for: req.query?.for || '',
-    method: req.method,
+    ...req.query,
     canCreateAudit: true
   }
 
